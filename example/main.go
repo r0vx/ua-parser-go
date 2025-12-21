@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	uaparser "github.com/example/ua-parser-go"
+	uaparser "github.com/r0vx/ua-parser-go"
 )
 
 func main() {

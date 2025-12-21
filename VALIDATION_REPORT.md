@@ -98,7 +98,7 @@ package main
 import (
     "fmt"
     "encoding/json"
-    uaparser "github.com/example/ua-parser-go"
+    uaparser "github.com/r0vx/ua-parser-go"
 )
 
 func main() {

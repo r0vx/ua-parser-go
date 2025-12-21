@@ -1,4 +1,4 @@
-module github.com/example/ua-parser-go
+module github.com/r0vx/ua-parser-go
 
 go 1.21
 

@@ -33,7 +33,7 @@
 ### 安装
 
 ```bash
-go get github.com/example/ua-parser-go
+go get github.com/r0vx/ua-parser-go
 ```
 
 ### 基本使用
@@ -43,7 +43,7 @@ package main
 
 import (
     "fmt"
-    uaparser "github.com/example/ua-parser-go"
+    uaparser "github.com/r0vx/ua-parser-go"
 )
 
 func main() {
