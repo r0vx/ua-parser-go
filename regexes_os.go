@@ -1,31 +1,46 @@
 package uaparser
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 var osRegexes = []RegexRule{
 	// Windows RT
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(windows nt) (6\.[23]); arm`),
+		Regexes: []*Regexp2{
+			MustCompile(`(windows nt) (6\.[23]); arm`),
 		},
 		Props: []interface{}{
-			PropMapper{Prop: PropName, Pattern: regexp.MustCompile(`N`), Replace: "R"},
+			PropMapper{Prop: PropName, Pattern: regexp.MustCompile(`(?i)NT`), Replace: "RT"},
 			PropMapper{Prop: PropVersion, StrMap: windowsVersionMap},
 		},
 	},
-	// Windows IoT/Mobile/Phone
+	// Windows IoT/Mobile/Phone and Windows versions
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(windows (?:phone|mobile|iot))(?: os)?[\/ ]?([\d\.]*( se)?)`),
-			regexp.MustCompile(`(?i)(windows)[\/ ](1[01]|2000|3\.1|7|8(\.1)?|9[58]|me|server 20\d\d( r2)?|vista|xp)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(windows (?:phone|mobile|iot))(?: os)?[\/ ]?([\d\.]*( se)?)`),
+			MustCompile(`(windows)[\/ ](1[01]|2000|3\.1|7|8(\.1)?|9[58]|me|server 20\d\d( r2)?|vista|xp)`),
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},
-	// Windows NT
+	// Windows NT (plain, no version number - should return "NT")
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)windows nt ?([\d\.]*)`),
-			regexp.MustCompile(`(?i)\bwin(?:nt| 9x )?([\d\.;]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(windows nt)\)(?!.+xbox)`),
+			MustCompile(`\b(winnt)[;\) ]`),
+		},
+		Props: []interface{}{
+			PropMapper{Prop: PropName, Value: BrowserWindows},
+			PropMapper{Prop: PropVersion, Value: "NT"},
+		},
+	},
+	// Windows NT with version (excluding Xbox)
+	{
+		Regexes: []*Regexp2{
+			MustCompile(`windows nt ?([\d\.]+)(?!.+xbox)`),
+			MustCompile(`\bwinnt([\d\.]+)`),
+			MustCompile(`\bwin(?=3| ?9)(?:nt| 9x )?([\d\.;]*)`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropVersion, Pattern: regexp.MustCompile(`[;)]`), Replace: "", StrMap: windowsVersionMap},
@@ -34,79 +49,75 @@ var osRegexes = []RegexRule{
 	},
 	// Windows CE
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(windows ce)\/?([\d\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(windows ce)\/?([\d\.]*)`),
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},
-	// iOS
+	// iOS/macOS
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)[adehimnop]{4,7}\b(?:.*os ([\w]+) like mac|; opera)`),
-			regexp.MustCompile(`(?i)(?:ios;fbsv|ip(?:ad|hone)(?: |.+i(?:pad)?)os|apple ?tv.+ios)[\/ ]([\w\.]+)`),
-			regexp.MustCompile(`(?i)\btvos ?([\w\.]+)`),
-			regexp.MustCompile(`(?i)cfnetwork\/.+darwin`),
+		Regexes: []*Regexp2{
+			MustCompile(`[adehimnop]{4,7}\b(?:.*os ([\w]+) like mac|; opera)`),
+			MustCompile(`(?:ios;fbsv|ios(?=.+ip(?:ad|hone)|.+apple ?tv)|ip(?:ad|hone)(?: |.+i(?:pad)?)os|apple ?tv.+ios)[\/ ]([\w\.]+)`),
+			MustCompile(`\btvos ?([\w\.]+)`),
+			MustCompile(`cfnetwork\/.+darwin`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropVersion, Pattern: regexp.MustCompile(`_`), Replace: "."},
 			PropMapper{Prop: PropName, Value: "iOS"},
 		},
 	},
-	// macOS
+	// macOS (excluding haiku and morphos)
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(mac os x) ?([\w\. ]*)`),
-			regexp.MustCompile(`(?i)(macintosh|mac_powerpc\b)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(mac os x) ?([\w\. ]*)`),
+			MustCompile(`(macintosh|mac_powerpc\b)(?!.+(haiku|morphos))`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropName, Value: "macOS"},
 			PropMapper{Prop: PropVersion, Pattern: regexp.MustCompile(`_`), Replace: "."},
 		},
 	},
-	// Chromecast Android
+	// Google Chromecast
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)android ([\d\.]+).*crkey`),
+		Regexes: []*Regexp2{
+			MustCompile(`android ([\d\.]+).*crkey`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: BrowserChromecast + " Android"},
 		},
 	},
-	// Chromecast Fuchsia
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)fuchsia.*crkey\/([\d\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`fuchsia.*crkey\/([\d\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: BrowserChromecast + " Fuchsia"},
 		},
 	},
-	// Chromecast SmartSpeaker
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)crkey\/([\d\.]+).*devicetype\/smartspeaker`),
+		Regexes: []*Regexp2{
+			MustCompile(`crkey\/([\d\.]+).*devicetype\/smartspeaker`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: BrowserChromecast + " SmartSpeaker"},
 		},
 	},
-	// Chromecast Linux
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)linux.*crkey\/([\d\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`linux.*crkey\/([\d\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: BrowserChromecast + " Linux"},
 		},
 	},
-	// Chromecast unknown
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)crkey\/([\d\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`crkey\/([\d\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -115,33 +126,33 @@ var osRegexes = []RegexRule{
 	},
 	// Android-x86
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)droid ([\w\.]+)\b.+(android[- ]x86)`),
+		Regexes: []*Regexp2{
+			MustCompile(`droid ([\w\.]+)\b.+(android[- ]x86)`),
 		},
 		Props: []interface{}{PropVersion, PropName},
 	},
 	// Ubuntu Touch
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(ubuntu) ([\w\.]+) like android`),
+		Regexes: []*Regexp2{
+			MustCompile(`(ubuntu) ([\w\.]+) like android`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropName, Fn: func(m string) string { return m + " Touch" }},
 			PropVersion,
 		},
 	},
-	// HarmonyOS, Android, BlackBerry, etc.
+	// HarmonyOS and other mobile OSes
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(harmonyos)[\/ ]?([\d\.]*)`),
-			regexp.MustCompile(`(?i)(android|bada|blackberry|kaios|maemo|meego|openharmony|qnx|rim tablet os|sailfish|series40|symbian|tizen)\w*[-\/\.; ]?([\d\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(harmonyos)[\/ ]?([\d\.]*)`),
+			MustCompile(`(android|bada|blackberry|kaios|maemo|meego|openharmony|qnx|rim tablet os|sailfish|series40|symbian|tizen)\w*[-\/\.; ]?([\d\.]*)`),
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},
 	// BlackBerry 10
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)\(bb(10);`),
+		Regexes: []*Regexp2{
+			MustCompile(`\(bb(10);`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -150,8 +161,8 @@ var osRegexes = []RegexRule{
 	},
 	// Symbian
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(?:symbian ?os|symbos|s60;|series ?60)[-\/ ]?([\w\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(?:symbian ?os|symbos|s60(?=;)|series ?60)[-\/ ]?([\w\.]*)`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -160,45 +171,45 @@ var osRegexes = []RegexRule{
 	},
 	// Firefox OS
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)mozilla\/[\d\.]+ \((?:mobile|tablet|tv|mobile; [\w ]+); rv:.+ gecko\/([\w\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`mozilla\/[\d\.]+ \((?:mobile|tablet|tv|mobile; [\w ]+); rv:.+ gecko\/([\w\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: BrowserFirefox + " OS"},
 		},
 	},
-	// webOS
+	// WebOS
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)\b(?:hp)?wos(?:browser)?\/([\w\.]+)`),
-			regexp.MustCompile(`(?i)webos(?:[ \/]?|\.tv-20)(\d[\d\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`\b(?:hp)?wos(?:browser)?\/([\w\.]+)`),
+			MustCompile(`webos(?:[ \/]?|\.tv-20(?=2[2-9]))(\d[\d\.]*)`),
 		},
 		Props: []interface{}{
 			PropVersion,
 			PropMapper{Prop: PropName, Value: "webOS"},
 		},
 	},
-	// webOS TV
+	// WebOS TV (Chrome version -> webOS version mapping)
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)web0s;.+?(?:chr[o0]me|safari)\/(\d+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`web0s;.+?(?:chr[o0]me|safari)\/(\d+)`),
 		},
 		Props: []interface{}{
 			PropMapper{
 				Prop: PropVersion,
 				StrMap: map[string]interface{}{
-					"120": "25",
-					"108": "24",
-					"94":  "23",
-					"87":  "22",
-					"79":  "6",
-					"68":  "5",
-					"53":  "4",
-					"38":  "3",
-					"538": "2",
-					"537": "1",
-					"*":   "TV",
+					"25": "120",
+					"24": "108",
+					"23": "94",
+					"22": "87",
+					"6":  "79",
+					"5":  "68",
+					"4":  "53",
+					"3":  "38",
+					"2":  "538",
+					"1":  "537",
+					"*":  "TV",
 				},
 			},
 			PropMapper{Prop: PropName, Value: "webOS"},
@@ -206,8 +217,8 @@ var osRegexes = []RegexRule{
 	},
 	// watchOS
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)watch(?: ?os[,\/]|\d,\d\/)([\d\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`watch(?: ?os[,\/]|\d,\d\/)([\d\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -216,46 +227,58 @@ var osRegexes = []RegexRule{
 	},
 	// Chrome OS
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(cros) [\w]+(?:\)| ([\w\.]+)\b)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(cros) [\w]+(?:\)| ([\w\.]+)\b)`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropName, Value: "Chrome OS"},
 			PropVersion,
 		},
 	},
-	// Smart TVs, Consoles
+	// Smart TVs and Consoles
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)panasonic;(viera)`),
-			regexp.MustCompile(`(?i)(netrange)mmh`),
-			regexp.MustCompile(`(?i)(nettv)\/(\d+\.[\w\.]+)`),
-			regexp.MustCompile(`(?i)(nintendo|playstation) (\w+)`),
-			regexp.MustCompile(`(?i)(xbox); +xbox ([^\);]+)`),
-			regexp.MustCompile(`(?i)(pico) .+os([\w\.]+)`),
+		Regexes: []*Regexp2{
+			MustCompile(`panasonic;(viera)`),
+			MustCompile(`(netrange)mmh`),
+			MustCompile(`(nettv)\/(\d+\.[\w\.]+)`),
+			MustCompile(`(nintendo|playstation) (\w+)`),
+			MustCompile(`(xbox); +xbox ([^\);]+)`),
+			MustCompile(`(pico) .+os([\w\.]+)`),
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},
-	// Various Linux distros
+	// Linux distros and other OSes
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)\b(joli|palm)\b ?(?:os)?\/?([\w\.]*)`),
-			regexp.MustCompile(`(?i)linux.+(mint)[\/\(\) ]?([\w\.]*)`),
-			regexp.MustCompile(`(?i)(mageia|vectorlinux|fuchsia|arcaos|arch)[;l ]([\d\.]*)`),
-			regexp.MustCompile(`(?i)([kxln]?ubuntu|debian|suse|opensuse|gentoo|slackware|fedora|mandriva|centos|pclinuxos|red ?hat|zenwalk|linpus|raspbian|plan 9|minix|risc os|contiki|deepin|manjaro|elementary os|sabayon|linspire|knoppix)(?: gnu[\/ ]linux)?(?: enterprise)?(?:[- ]linux)?(?:-gnu)?[-\/ ]?([-\w\.]*)`),
-			regexp.MustCompile(`(?i)((?:open)?solaris)[-\/ ]?([\w\.]*)`),
-			regexp.MustCompile(`(?i)\b(aix)[; ]([1-9\.]{0,4})`),
-			regexp.MustCompile(`(?i)(hurd|linux|morphos)(?: (?:arm|x86|ppc)\w*| ?)([\w\.]*)`),
-			regexp.MustCompile(`(?i)(gnu) ?([\w\.]*)`),
-			regexp.MustCompile(`(?i)\b([-frentopcghs]{0,5}bsd|dragonfly)[\/ ]?([\w\.]*)`),
-			regexp.MustCompile(`(?i)(haiku) ?(r\d)?`),
+		Regexes: []*Regexp2{
+			MustCompile(`\b(joli|palm)\b ?(?:os)?\/?([\w\.]*)`),
+			MustCompile(`linux.+(mint)[\/\(\) ]?([\w\.]*)`),
+			MustCompile(`(mageia|vectorlinux|fuchsia|arcaos|arch(?= ?linux))[;l ]([\d\.]*)`),
+			MustCompile(`([kxln]?ubuntu|debian|suse|opensuse|gentoo|slackware|fedora|mandriva|centos|pclinuxos|red ?hat|zenwalk|linpus|raspbian|plan 9|minix|risc os|contiki|deepin|manjaro|elementary os|sabayon|linspire|knoppix)(?: gnu[\/ ]linux)?(?: enterprise)?(?:[- ]linux)?(?:-gnu)?[-\/ ]?(?!chrom|package)([-\w\.]*)`),
+			MustCompile(`((?:open)?solaris)[-\/ ]?([\w\.]*)`),
+			MustCompile(`\b(aix)[; ]([1-9\.]{0,4})`),
+			MustCompile(`(hurd|linux|morphos)(?: (?:arm|x86|ppc)\w*| ?)([\w\.]*)`),
+			MustCompile(`(gnu) ?([\w\.]*)`),
+			MustCompile(`\b([-frentopcghs]{0,5}bsd|dragonfly)[\/ ]?(?!amd|[ix346]{1,2}86)([\w\.]*)`),
+			MustCompile(`(haiku) ?(r\d)?`),
 		},
-		Props: []interface{}{PropName, PropVersion},
+		Props: []interface{}{
+			PropName,
+			PropMapper{Prop: PropVersion, Fn: func(v string) string {
+				vLower := strings.ToLower(v)
+				// Exclude architecture names
+				if vLower == "amd" || vLower == "i386" || vLower == "i486" || vLower == "i586" || vLower == "i686" ||
+					vLower == "x86_64" || vLower == "chrom" || vLower == "package" ||
+					strings.HasPrefix(vLower, "chrom") {
+					return ""
+				}
+				return v
+			}},
+		},
 	},
 	// Solaris
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(sunos) ?([\d\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`(sunos) ?([\d\.]*)`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropName, Value: "Solaris"},
@@ -264,9 +287,9 @@ var osRegexes = []RegexRule{
 	},
 	// BeOS/OS2/AmigaOS/OpenVMS/HP-UX/SerenityOS, Unix
 	{
-		Regexes: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)\b(beos|os\/2|amigaos|openvms|hp-ux|serenityos)`),
-			regexp.MustCompile(`(?i)(unix) ?([\w\.]*)`),
+		Regexes: []*Regexp2{
+			MustCompile(`\b(beos|os\/2|amigaos|openvms|hp-ux|serenityos)`),
+			MustCompile(`(unix) ?([\w\.]*)`),
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},

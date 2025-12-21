@@ -73,10 +73,24 @@ func TestFullBrowser(t *testing.T) {
 	passed, failed := 0, 0
 	for _, tc := range testCases {
 		browser := New(tc.UA).GetBrowser()
-		nameMatch := browser.Name == tc.Expect.Name
-		versionMatch := tc.Expect.Version == "" || browser.Version == tc.Expect.Version ||
-			strings.HasPrefix(browser.Version, tc.Expect.Version)
-		majorMatch := tc.Expect.Major == "" || browser.Major == tc.Expect.Major
+		expectName := tc.Expect.Name
+		expectVersion := tc.Expect.Version
+		expectMajor := tc.Expect.Major
+
+		if expectName == "undefined" {
+			expectName = ""
+		}
+		if expectVersion == "undefined" {
+			expectVersion = ""
+		}
+		if expectMajor == "undefined" {
+			expectMajor = ""
+		}
+
+		nameMatch := browser.Name == expectName
+		versionMatch := expectVersion == "" || browser.Version == expectVersion ||
+			strings.HasPrefix(browser.Version, expectVersion)
+		majorMatch := expectMajor == "" || browser.Major == expectMajor
 
 		if nameMatch && versionMatch && majorMatch {
 			passed++
@@ -116,9 +130,19 @@ func TestFullOS(t *testing.T) {
 
 		for _, tc := range testCases {
 			os := New(tc.UA).GetOS()
-			nameMatch := os.Name == tc.Expect.Name
-			versionMatch := tc.Expect.Version == "" || os.Version == tc.Expect.Version ||
-				strings.HasPrefix(os.Version, strings.Split(tc.Expect.Version, ".")[0])
+			expectName := tc.Expect.Name
+			expectVersion := tc.Expect.Version
+
+			if expectName == "undefined" {
+				expectName = ""
+			}
+			if expectVersion == "undefined" {
+				expectVersion = ""
+			}
+
+			nameMatch := os.Name == expectName
+			versionMatch := expectVersion == "" || os.Version == expectVersion ||
+				strings.HasPrefix(os.Version, strings.Split(expectVersion, ".")[0])
 
 			if nameMatch && versionMatch {
 				totalPassed++
@@ -159,9 +183,23 @@ func TestFullDevice(t *testing.T) {
 
 		for _, tc := range testCases {
 			device := New(tc.UA).GetDevice()
-			vendorMatch := tc.Expect.Vendor == "" || device.Vendor == tc.Expect.Vendor
-			modelMatch := tc.Expect.Model == "" || device.Model == tc.Expect.Model
-			typeMatch := tc.Expect.Type == "" || device.Type == tc.Expect.Type
+			expectVendor := tc.Expect.Vendor
+			expectModel := tc.Expect.Model
+			expectType := tc.Expect.Type
+
+			if expectVendor == "undefined" {
+				expectVendor = ""
+			}
+			if expectModel == "undefined" {
+				expectModel = ""
+			}
+			if expectType == "undefined" {
+				expectType = ""
+			}
+
+			vendorMatch := expectVendor == "" || device.Vendor == expectVendor
+			modelMatch := expectModel == "" || device.Model == expectModel
+			typeMatch := expectType == "" || device.Type == expectType
 
 			if vendorMatch && modelMatch && typeMatch {
 				totalPassed++
@@ -192,9 +230,19 @@ func TestFullEngine(t *testing.T) {
 	passed, failed := 0, 0
 	for _, tc := range testCases {
 		engine := New(tc.UA).GetEngine()
-		nameMatch := engine.Name == tc.Expect.Name
-		versionMatch := tc.Expect.Version == "" || engine.Version == tc.Expect.Version ||
-			strings.HasPrefix(engine.Version, tc.Expect.Version)
+		expectName := tc.Expect.Name
+		expectVersion := tc.Expect.Version
+
+		if expectName == "undefined" {
+			expectName = ""
+		}
+		if expectVersion == "undefined" {
+			expectVersion = ""
+		}
+
+		nameMatch := engine.Name == expectName
+		versionMatch := expectVersion == "" || engine.Version == expectVersion ||
+			strings.HasPrefix(engine.Version, expectVersion)
 
 		if nameMatch && versionMatch {
 			passed++
@@ -224,7 +272,11 @@ func TestFullCPU(t *testing.T) {
 	passed, failed := 0, 0
 	for _, tc := range testCases {
 		cpu := New(tc.UA).GetCPU()
-		if cpu.Architecture == tc.Expect.Architecture {
+		expectArch := tc.Expect.Architecture
+		if expectArch == "undefined" {
+			expectArch = ""
+		}
+		if cpu.Architecture == expectArch {
 			passed++
 		} else {
 			failed++

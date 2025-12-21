@@ -4,7 +4,12 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 )
+
+// Regexp2 is a type alias for regexp2.Regexp
+type Regexp2 = regexp2.Regexp
 
 // PropMapper defines how to map a regex match to a property
 type PropMapper struct {
@@ -14,7 +19,7 @@ type PropMapper struct {
 	Value string
 	// Function to transform the match
 	Fn func(match string) string
-	// Regex pattern for replacement
+	// Regex pattern for replacement (standard regexp for simple replacements)
 	Pattern *regexp.Regexp
 	// Replacement string
 	Replace string
@@ -24,8 +29,17 @@ type PropMapper struct {
 
 // RegexRule defines a regex rule with property mappings
 type RegexRule struct {
-	Regexes []*regexp.Regexp
+	Regexes []*regexp2.Regexp
 	Props   []interface{} // can be string or PropMapper
+}
+
+// MustCompile compiles a regexp2 pattern with case-insensitive flag
+func MustCompile(pattern string) *regexp2.Regexp {
+	re, err := regexp2.Compile(pattern, regexp2.IgnoreCase)
+	if err != nil {
+		panic("regexp2: Compile(" + pattern + "): " + err.Error())
+	}
+	return re
 }
 
 // rgxMapper applies regex rules to extract values
@@ -45,30 +59,33 @@ func rgxMapper(result interface{}, ua string, rules []RegexRule) {
 			if regex == nil {
 				continue
 			}
-			matches := regex.FindStringSubmatch(ua)
-			if matches == nil {
+			match, err := regex.FindStringMatch(ua)
+			if err != nil || match == nil {
 				continue
 			}
+
+			// Get all groups
+			groups := match.Groups()
 
 			// Apply property mappings
 			matchIdx := 0
 			for _, prop := range rule.Props {
 				matchIdx++
-				var match string
-				if matchIdx < len(matches) {
-					match = matches[matchIdx]
+				var matchStr string
+				if matchIdx < len(groups) {
+					matchStr = groups[matchIdx].String()
 				}
 
 				switch p := prop.(type) {
 				case string:
 					// Simple property name
-					setField(rv, p, match)
+					setField(rv, p, matchStr)
 				case PropMapper:
 					// Complex property mapping
-					applyPropMapper(rv, p, match)
+					applyPropMapper(rv, p, matchStr)
 				case []interface{}:
 					// Array format: [propName, value] or [propName, pattern, replace] etc.
-					applyArrayMapper(rv, p, match)
+					applyArrayMapper(rv, p, matchStr)
 				}
 			}
 			return // Found a match, stop processing
@@ -234,4 +251,3 @@ var formFactorsMap = map[string]interface{}{
 	Unknown:        []string{"Desktop", "Unknown"},
 	"*":            "",
 }
-

@@ -5,6 +5,7 @@
 package uaparser
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -152,6 +153,22 @@ func (p *UAParser) GetEngine() Engine {
 func (p *UAParser) GetOS() OS {
 	os := OS{}
 	rgxMapper(&os, p.ua, osRegexes)
+
+	// Special JS logic for iOS 18.6 Safari 26+
+	if os.Name == "iOS" && os.Version == "18.6" {
+		re := regexp.MustCompile(`\) Version/([\d\.]+)`)
+		match := re.FindStringSubmatch(p.ua)
+		if len(match) > 1 {
+			safariVer := match[1]
+			majorStr := strings.Split(safariVer, ".")[0]
+			var major int
+			_, err := fmt.Sscanf(majorStr, "%d", &major)
+			if err == nil && major >= 26 {
+				os.Version = safariVer
+			}
+		}
+	}
+
 	return os
 }
 
