@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	Version      = "2.0.7"
-	UAMaxLength  = 500
-	Empty        = ""
-	Unknown      = "?"
+	Version     = "2.0.7"
+	UAMaxLength = 500
+	Empty       = ""
+	Unknown     = "?"
 )
 
 // Property names
@@ -217,4 +217,3 @@ func has(arr []string, str string) bool {
 	}
 	return false
 }
-

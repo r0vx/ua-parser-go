@@ -74,27 +74,27 @@ var BrowserType = struct {
 
 // CPUArch constants for CPU architectures
 var CPUArch = struct {
-	AMD64  string
-	IA32   string
-	ARM64  string
-	ARMHF  string
-	ARM    string
-	SPARC  string
-	IA64   string
-	MIPS   string
-	PPC    string
-	Alpha  string
+	AMD64 string
+	IA32  string
+	ARM64 string
+	ARMHF string
+	ARM   string
+	SPARC string
+	IA64  string
+	MIPS  string
+	PPC   string
+	Alpha string
 }{
-	AMD64:  "amd64",
-	IA32:   "ia32",
-	ARM64:  "arm64",
-	ARMHF:  "armhf",
-	ARM:    "arm",
-	SPARC:  "sparc",
-	IA64:   "ia64",
-	MIPS:   "mips",
-	PPC:    "ppc",
-	Alpha:  "alpha",
+	AMD64: "amd64",
+	IA32:  "ia32",
+	ARM64: "arm64",
+	ARMHF: "armhf",
+	ARM:   "arm",
+	SPARC: "sparc",
+	IA64:  "ia64",
+	MIPS:  "mips",
+	PPC:   "ppc",
+	Alpha: "alpha",
 }
 
 // DeviceType constants for device types
@@ -120,39 +120,39 @@ var DeviceType = struct {
 
 // DeviceVendor constants for device vendors
 var DeviceVendor = struct {
-	Amazon    string
-	Apple     string
-	Asus      string
+	Amazon     string
+	Apple      string
+	Asus       string
 	BlackBerry string
-	Google    string
-	Huawei    string
-	Lenovo    string
-	LG        string
-	Microsoft string
-	Motorola  string
-	Nokia     string
-	OnePlus   string
-	Oppo      string
-	Samsung   string
-	Sony      string
-	Xiaomi    string
+	Google     string
+	Huawei     string
+	Lenovo     string
+	LG         string
+	Microsoft  string
+	Motorola   string
+	Nokia      string
+	OnePlus    string
+	Oppo       string
+	Samsung    string
+	Sony       string
+	Xiaomi     string
 }{
-	Amazon:    "Amazon",
-	Apple:     "Apple",
-	Asus:      "ASUS",
+	Amazon:     "Amazon",
+	Apple:      "Apple",
+	Asus:       "ASUS",
 	BlackBerry: "BlackBerry",
-	Google:    "Google",
-	Huawei:    "Huawei",
-	Lenovo:    "Lenovo",
-	LG:        "LG",
-	Microsoft: "Microsoft",
-	Motorola:  "Motorola",
-	Nokia:     "Nokia",
-	OnePlus:   "OnePlus",
-	Oppo:      "OPPO",
-	Samsung:   "Samsung",
-	Sony:      "Sony",
-	Xiaomi:    "Xiaomi",
+	Google:     "Google",
+	Huawei:     "Huawei",
+	Lenovo:     "Lenovo",
+	LG:         "LG",
+	Microsoft:  "Microsoft",
+	Motorola:   "Motorola",
+	Nokia:      "Nokia",
+	OnePlus:    "OnePlus",
+	Oppo:       "OPPO",
+	Samsung:    "Samsung",
+	Sony:       "Sony",
+	Xiaomi:     "Xiaomi",
 }
 
 // EngineName constants for browser engine names
@@ -174,20 +174,19 @@ var EngineName = struct {
 
 // OSName constants for operating system names
 var OSName = struct {
-	Android   string
-	ChromeOS  string
-	iOS       string
-	Linux     string
-	MacOS     string
-	Windows   string
+	Android      string
+	ChromeOS     string
+	iOS          string
+	Linux        string
+	MacOS        string
+	Windows      string
 	WindowsPhone string
 }{
-	Android:   "Android",
-	ChromeOS:  "Chrome OS",
-	iOS:       "iOS",
-	Linux:     "Linux",
-	MacOS:     "macOS",
-	Windows:   "Windows",
+	Android:      "Android",
+	ChromeOS:     "Chrome OS",
+	iOS:          "iOS",
+	Linux:        "Linux",
+	MacOS:        "macOS",
+	Windows:      "Windows",
 	WindowsPhone: "Windows Phone",
 }
-

@@ -19,13 +19,19 @@ func TestAnalyzeBrowserFailures(t *testing.T) {
 	var failures []string
 	for i, tc := range testCases {
 		browser := New(tc.UA).GetBrowser()
-		
+
 		expectName := tc.Expect.Name
 		expectVersion := tc.Expect.Version
 		expectMajor := tc.Expect.Major
-		if expectName == "undefined" { expectName = "" }
-		if expectVersion == "undefined" { expectVersion = "" }
-		if expectMajor == "undefined" { expectMajor = "" }
+		if expectName == "undefined" {
+			expectName = ""
+		}
+		if expectVersion == "undefined" {
+			expectVersion = ""
+		}
+		if expectMajor == "undefined" {
+			expectMajor = ""
+		}
 
 		nameMatch := browser.Name == expectName
 		versionMatch := expectVersion == "" || browser.Version == expectVersion ||
@@ -59,7 +65,9 @@ func TestAnalyzeCPUFailures(t *testing.T) {
 	for i, tc := range testCases {
 		cpu := New(tc.UA).GetCPU()
 		expectArch := tc.Expect.Architecture
-		if expectArch == "undefined" { expectArch = "" }
+		if expectArch == "undefined" {
+			expectArch = ""
+		}
 
 		if cpu.Architecture != expectArch {
 			failures = append(failures, fmt.Sprintf("[%d] %s\n  UA: %s\n  期望: arch=%q\n  实际: arch=%q",
@@ -85,11 +93,15 @@ func TestAnalyzeEngineFailures(t *testing.T) {
 	var failures []string
 	for i, tc := range testCases {
 		engine := New(tc.UA).GetEngine()
-		
+
 		expectName := tc.Expect.Name
 		expectVersion := tc.Expect.Version
-		if expectName == "undefined" { expectName = "" }
-		if expectVersion == "undefined" { expectVersion = "" }
+		if expectName == "undefined" {
+			expectName = ""
+		}
+		if expectVersion == "undefined" {
+			expectVersion = ""
+		}
 
 		nameMatch := engine.Name == expectName
 		versionMatch := expectVersion == "" || engine.Version == expectVersion ||
@@ -132,11 +144,15 @@ func TestAnalyzeOSFailures(t *testing.T) {
 
 		for i, tc := range testCases {
 			os := New(tc.UA).GetOS()
-			
+
 			expectName := tc.Expect.Name
 			expectVersion := tc.Expect.Version
-			if expectName == "undefined" { expectName = "" }
-			if expectVersion == "undefined" { expectVersion = "" }
+			if expectName == "undefined" {
+				expectName = ""
+			}
+			if expectVersion == "undefined" {
+				expectVersion = ""
+			}
 
 			nameMatch := os.Name == expectName
 			versionMatch := expectVersion == "" || os.Version == expectVersion ||
@@ -185,13 +201,19 @@ func TestAnalyzeDeviceFailures(t *testing.T) {
 		fileFailures := 0
 		for i, tc := range testCases {
 			device := New(tc.UA).GetDevice()
-			
+
 			expectVendor := tc.Expect.Vendor
 			expectModel := tc.Expect.Model
 			expectType := tc.Expect.Type
-			if expectVendor == "undefined" { expectVendor = "" }
-			if expectModel == "undefined" { expectModel = "" }
-			if expectType == "undefined" { expectType = "" }
+			if expectVendor == "undefined" {
+				expectVendor = ""
+			}
+			if expectModel == "undefined" {
+				expectModel = ""
+			}
+			if expectType == "undefined" {
+				expectType = ""
+			}
 
 			vendorMatch := expectVendor == "" || device.Vendor == expectVendor
 			modelMatch := expectModel == "" || device.Model == expectModel

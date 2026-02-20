@@ -1,0 +1,46 @@
+=== RUN   TestFullBrowser
+    full_validate_test.go:103: 浏览器检测: 282/282 (100.0%)
+--- PASS: TestFullBrowser (0.02s)
+=== RUN   TestFullOS
+    full_validate_test.go:156: 操作系统检测: 258/258 (100.0%)
+--- PASS: TestFullOS (0.01s)
+=== RUN   TestFullDevice
+    full_validate_test.go:213: 设备检测: 963/963 (100.0%)
+--- PASS: TestFullDevice (0.12s)
+=== RUN   TestFullEngine
+    full_validate_test.go:255: 引擎检测: 21/21 (100.0%)
+--- PASS: TestFullEngine (0.00s)
+=== RUN   TestFullCPU
+    full_validate_test.go:287: CPU检测: 39/39 (100.0%)
+--- PASS: TestFullCPU (0.00s)
+=== RUN   TestFullSummary
+=== RUN   TestFullSummary/Browser
+    full_validate_test.go:103: 浏览器检测: 282/282 (100.0%)
+=== RUN   TestFullSummary/OS
+    full_validate_test.go:156: 操作系统检测: 258/258 (100.0%)
+=== RUN   TestFullSummary/Device
+    full_validate_test.go:213: 设备检测: 963/963 (100.0%)
+=== RUN   TestFullSummary/Engine
+    full_validate_test.go:255: 引擎检测: 21/21 (100.0%)
+=== RUN   TestFullSummary/CPU
+    full_validate_test.go:287: CPU检测: 39/39 (100.0%)
+
+========================================
+   完整验证测试总结
+========================================
+对比原始 ua-parser-js 项目的全部测试数据
+  - 浏览器测试用例: 282个
+  - 操作系统测试用例: 258个
+  - 设备测试用例: 963个
+  - 引擎测试用例: 21个
+  - CPU测试用例: 39个
+  总计: 1563个测试用例
+========================================
+--- PASS: TestFullSummary (0.14s)
+    --- PASS: TestFullSummary/Browser (0.02s)
+    --- PASS: TestFullSummary/OS (0.01s)
+    --- PASS: TestFullSummary/Device (0.11s)
+    --- PASS: TestFullSummary/Engine (0.00s)
+    --- PASS: TestFullSummary/CPU (0.00s)
+PASS
+ok  	github.com/r0vx/ua-parser-go	0.306s

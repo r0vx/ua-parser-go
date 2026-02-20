@@ -294,7 +294,7 @@ func TestFullSummary(t *testing.T) {
 	t.Run("Device", TestFullDevice)
 	t.Run("Engine", TestFullEngine)
 	t.Run("CPU", TestFullCPU)
-	
+
 	fmt.Println("\n========================================")
 	fmt.Println("   完整验证测试总结")
 	fmt.Println("========================================")
@@ -307,4 +307,3 @@ func TestFullSummary(t *testing.T) {
 	fmt.Println("  总计: 1563个测试用例")
 	fmt.Println("========================================")
 }
-

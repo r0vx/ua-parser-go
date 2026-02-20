@@ -223,8 +223,7 @@ var deviceRegexes = []RegexRule{
 	},
 	// Lenovo Mobiles
 	{
-		Regexes: []*Regexp2{MustCompile(`lenovo[-_ ]?([-\w ]+?)(?: bui|\)|\/)`),
-		},
+		Regexes: []*Regexp2{MustCompile(`lenovo[-_ ]?([-\w ]+?)(?: bui|\)|\/)`)},
 		Props: []interface{}{
 			PropModel,
 			PropMapper{Prop: PropVendor, Value: VendorLenovo},

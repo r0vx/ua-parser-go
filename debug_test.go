@@ -10,4 +10,3 @@ func TestDebugAIX(t *testing.T) {
 	os := New(ua).GetOS()
 	fmt.Printf("AIX result: name=%q version=%q\n", os.Name, os.Version)
 }
-

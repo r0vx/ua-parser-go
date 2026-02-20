@@ -242,7 +242,7 @@ func TestParseOS(t *testing.T) {
 			name: "Linux",
 			ua:   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 			os: OS{
-				Name:    "Linux",
+				Name: "Linux",
 			},
 		},
 		{
@@ -474,10 +474,10 @@ func TestUAMaxLength(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		longUA += "a"
 	}
-	
+
 	parser := New(longUA)
 	ua := parser.GetUA()
-	
+
 	if len(ua) != UAMaxLength {
 		t.Errorf("UA length = %d, want %d", len(ua), UAMaxLength)
 	}
@@ -485,7 +485,7 @@ func TestUAMaxLength(t *testing.T) {
 
 func BenchmarkParse(b *testing.B) {
 	ua := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-	
+
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		Parse(ua)
@@ -495,7 +495,7 @@ func BenchmarkParse(b *testing.B) {
 func BenchmarkGetBrowser(b *testing.B) {
 	ua := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	parser := New(ua)
-	
+
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		parser.GetBrowser()

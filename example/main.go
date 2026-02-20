@@ -35,27 +35,27 @@ func main() {
 
 		// 方法 2: 使用 Parser 实例
 		parser := uaparser.New(ua)
-		
+
 		fmt.Println("\n解析结果 (分类):")
-		fmt.Printf("  浏览器: %s %s (major: %s)\n", 
+		fmt.Printf("  浏览器: %s %s (major: %s)\n",
 			parser.GetBrowser().Name,
 			parser.GetBrowser().Version,
 			parser.GetBrowser().Major)
-		
-		fmt.Printf("  操作系统: %s %s\n", 
+
+		fmt.Printf("  操作系统: %s %s\n",
 			parser.GetOS().Name,
 			parser.GetOS().Version)
-		
-		fmt.Printf("  设备: %s %s (%s)\n", 
+
+		fmt.Printf("  设备: %s %s (%s)\n",
 			parser.GetDevice().Vendor,
 			parser.GetDevice().Model,
 			parser.GetDevice().Type)
-		
-		fmt.Printf("  引擎: %s %s\n", 
+
+		fmt.Printf("  引擎: %s %s\n",
 			parser.GetEngine().Name,
 			parser.GetEngine().Version)
-		
-		fmt.Printf("  CPU架构: %s\n", 
+
+		fmt.Printf("  CPU架构: %s\n",
 			parser.GetCPU().Architecture)
 
 		fmt.Println()
@@ -63,4 +63,3 @@ func main() {
 		fmt.Println()
 	}
 }
-
