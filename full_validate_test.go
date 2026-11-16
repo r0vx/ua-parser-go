@@ -17,6 +17,7 @@ type BrowserTestCase struct {
 		Name    string `json:"name"`
 		Version string `json:"version"`
 		Major   string `json:"major"`
+		Type    string `json:"type"`
 	} `json:"expect"`
 }
 
@@ -76,6 +77,7 @@ func TestFullBrowser(t *testing.T) {
 		expectName := tc.Expect.Name
 		expectVersion := tc.Expect.Version
 		expectMajor := tc.Expect.Major
+		expectType := tc.Expect.Type
 
 		if expectName == "undefined" {
 			expectName = ""
@@ -86,13 +88,17 @@ func TestFullBrowser(t *testing.T) {
 		if expectMajor == "undefined" {
 			expectMajor = ""
 		}
+		if expectType == "undefined" {
+			expectType = ""
+		}
 
 		nameMatch := browser.Name == expectName
 		versionMatch := expectVersion == "" || browser.Version == expectVersion ||
 			strings.HasPrefix(browser.Version, expectVersion)
 		majorMatch := expectMajor == "" || browser.Major == expectMajor
+		typeMatch := expectType == "" || browser.Type == expectType
 
-		if nameMatch && versionMatch && majorMatch {
+		if nameMatch && versionMatch && majorMatch && typeMatch {
 			passed++
 		} else {
 			failed++
@@ -101,6 +107,9 @@ func TestFullBrowser(t *testing.T) {
 
 	total := passed + failed
 	t.Logf("浏览器检测: %d/%d (%.1f%%)", passed, total, float64(passed)/float64(total)*100)
+	if failed > 0 {
+		t.Errorf("浏览器检测失败 %d 例", failed)
+	}
 }
 
 // 完整测试 - 操作系统
@@ -154,6 +163,9 @@ func TestFullOS(t *testing.T) {
 
 	total := totalPassed + totalFailed
 	t.Logf("操作系统检测: %d/%d (%.1f%%)", totalPassed, total, float64(totalPassed)/float64(total)*100)
+	if totalFailed > 0 {
+		t.Errorf("操作系统检测失败 %d 例", totalFailed)
+	}
 }
 
 // 完整测试 - 设备
@@ -211,6 +223,9 @@ func TestFullDevice(t *testing.T) {
 
 	total := totalPassed + totalFailed
 	t.Logf("设备检测: %d/%d (%.1f%%)", totalPassed, total, float64(totalPassed)/float64(total)*100)
+	if totalFailed > 0 {
+		t.Errorf("设备检测失败 %d 例", totalFailed)
+	}
 }
 
 // 完整测试 - 引擎
@@ -253,6 +268,9 @@ func TestFullEngine(t *testing.T) {
 
 	total := passed + failed
 	t.Logf("引擎检测: %d/%d (%.1f%%)", passed, total, float64(passed)/float64(total)*100)
+	if failed > 0 {
+		t.Errorf("引擎检测失败 %d 例", failed)
+	}
 }
 
 // 完整测试 - CPU
@@ -285,6 +303,9 @@ func TestFullCPU(t *testing.T) {
 
 	total := passed + failed
 	t.Logf("CPU检测: %d/%d (%.1f%%)", passed, total, float64(passed)/float64(total)*100)
+	if failed > 0 {
+		t.Errorf("CPU检测失败 %d 例", failed)
+	}
 }
 
 // 汇总测试
@@ -299,11 +320,11 @@ func TestFullSummary(t *testing.T) {
 	fmt.Println("   完整验证测试总结")
 	fmt.Println("========================================")
 	fmt.Println("对比原始 ua-parser-js 项目的全部测试数据")
-	fmt.Println("  - 浏览器测试用例: 282个")
-	fmt.Println("  - 操作系统测试用例: 258个")
-	fmt.Println("  - 设备测试用例: 963个")
-	fmt.Println("  - 引擎测试用例: 21个")
+	fmt.Println("  - 浏览器测试用例: 294个")
+	fmt.Println("  - 操作系统测试用例: 269个")
+	fmt.Println("  - 设备测试用例: 980个")
+	fmt.Println("  - 引擎测试用例: 22个")
 	fmt.Println("  - CPU测试用例: 39个")
-	fmt.Println("  总计: 1563个测试用例")
+	fmt.Println("  总计: 1604个测试用例")
 	fmt.Println("========================================")
 }

@@ -1,17 +1,18 @@
 // Package uaparser provides User-Agent string parsing functionality.
 // It can detect browser, engine, OS, CPU, and device information from User-Agent data.
 //
-// This is a Go port of UAParser.js v2.0.7 (https://github.com/faisalman/ua-parser-js)
+// This is a Go port of UAParser.js v2.0.10 (https://github.com/faisalman/ua-parser-js)
 package uaparser
 
 import (
-	"fmt"
+	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 const (
-	Version     = "2.0.7"
+	Version     = "2.0.10"
 	UAMaxLength = 500
 	Empty       = ""
 	Unknown     = "?"
@@ -42,6 +43,15 @@ const (
 // Browser types
 const (
 	BrowserTypeInApp = "inapp"
+	// BrowserTypeFetcher marks fetching tools such as Chrome Lighthouse.
+	BrowserTypeFetcher = "fetcher"
+)
+
+// iOS 26+ freezes the OS version reported in Safari UAs at 18/19;
+// the real version is taken from the Safari version token instead.
+var (
+	iOSFrozenVersionRe = regexp.MustCompile(`^1[89][^\d]`)
+	safariVersionRe    = regexp.MustCompile(`\) Version\/((\d+)[\d\.]*)`)
 )
 
 // Browser represents browser information
@@ -89,6 +99,7 @@ type Result struct {
 // UAParser is the main parser struct
 type UAParser struct {
 	ua string
+	ch *ClientHints
 }
 
 // New creates a new UAParser with the given user agent string
@@ -102,6 +113,29 @@ func New(ua string) *UAParser {
 // Parse is a convenience function to parse a user agent string directly
 func Parse(ua string) *Result {
 	return New(ua).GetResult()
+}
+
+// ParseWithClientHints 解析 UA 并叠加 Sec-CH-UA* 客户端提示。
+// ua 为空时使用 headers 中的 user-agent。
+func ParseWithClientHints(ua string, headers map[string]string) *Result {
+	if ua == "" {
+		ua = headerValue(headers, chUserAgent)
+	}
+	return New(ua).SetClientHints(NewClientHints(headers)).GetResult()
+}
+
+// ParseWithHTTPHeaders 从 http.Header 解析 UA 与客户端提示。
+func ParseWithHTTPHeaders(ua string, headers http.Header) *Result {
+	if ua == "" {
+		ua = headers.Get(chUserAgent)
+	}
+	return New(ua).SetClientHints(NewClientHintsFromHTTP(headers)).GetResult()
+}
+
+// SetClientHints 设置客户端提示，后续 Get* 会在 UA 解析结果上叠加。
+func (p *UAParser) SetClientHints(ch ClientHints) *UAParser {
+	p.ch = &ch
+	return p
 }
 
 // SetUA sets the user agent string
@@ -125,6 +159,9 @@ func (p *UAParser) GetBrowser() Browser {
 	if browser.Version != "" {
 		browser.Major = majorize(browser.Version)
 	}
+	if p.ch != nil {
+		applyBrowserCH(&browser, p.ch)
+	}
 	return browser
 }
 
@@ -132,6 +169,9 @@ func (p *UAParser) GetBrowser() Browser {
 func (p *UAParser) GetCPU() CPU {
 	cpu := CPU{}
 	rgxMapper(&cpu, p.ua, cpuRegexes)
+	if p.ch != nil {
+		applyCPUCH(&cpu, p.ch)
+	}
 	return cpu
 }
 
@@ -139,6 +179,9 @@ func (p *UAParser) GetCPU() CPU {
 func (p *UAParser) GetDevice() Device {
 	device := Device{}
 	rgxMapper(&device, p.ua, deviceRegexes)
+	if p.ch != nil {
+		applyDeviceCH(&device, p.ch)
+	}
 	return device
 }
 
@@ -146,6 +189,9 @@ func (p *UAParser) GetDevice() Device {
 func (p *UAParser) GetEngine() Engine {
 	engine := Engine{}
 	rgxMapper(&engine, p.ua, engineRegexes)
+	if p.ch != nil {
+		applyEngineCH(&engine, p.ch)
+	}
 	return engine
 }
 
@@ -154,19 +200,18 @@ func (p *UAParser) GetOS() OS {
 	os := OS{}
 	rgxMapper(&os, p.ua, osRegexes)
 
-	// Special JS logic for iOS 18.6 Safari 26+
-	if os.Name == "iOS" && os.Version == "18.6" {
-		re := regexp.MustCompile(`\) Version/([\d\.]+)`)
-		match := re.FindStringSubmatch(p.ua)
-		if len(match) > 1 {
-			safariVer := match[1]
-			majorStr := strings.Split(safariVer, ".")[0]
-			var major int
-			_, err := fmt.Sscanf(majorStr, "%d", &major)
-			if err == nil && major >= 26 {
-				os.Version = safariVer
+	// Since iOS 26, Safari's UA reports the OS version as frozen at 18:
+	// https://webkit.org/blog/17333/webkit-features-in-safari-26-0/#update-to-ua-string
+	if os.Name == "iOS" && os.Version != "" && iOSFrozenVersionRe.MatchString(os.Version) {
+		match := safariVersionRe.FindStringSubmatch(p.ua)
+		if len(match) > 2 {
+			if major, err := strconv.Atoi(match[2]); err == nil && major >= 26 {
+				os.Version = match[1]
 			}
 		}
+	}
+	if p.ch != nil {
+		applyOSCH(&os, p.ch)
 	}
 
 	return os

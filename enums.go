@@ -14,6 +14,7 @@ var BrowserName = struct {
 	FirefoxMobile  string
 	Opera          string
 	OperaMini      string
+	OperaNeon      string
 	Safari         string
 	SafariMobile   string
 	Samsung        string
@@ -26,6 +27,12 @@ var BrowserName = struct {
 	WeChat         string
 	QQBrowser      string
 	Baidu          string
+	Aloha          string
+	Avira          string
+	HiBrowser      string
+	Lighthouse     string
+	Luakit         string
+	Norton         string
 }{
 	Chrome:         "Chrome",
 	ChromeHeadless: "Chrome Headless",
@@ -39,6 +46,7 @@ var BrowserName = struct {
 	FirefoxMobile:  "Mobile Firefox",
 	Opera:          "Opera",
 	OperaMini:      "Opera Mini",
+	OperaNeon:      "Opera Neon",
 	Safari:         "Safari",
 	SafariMobile:   "Mobile Safari",
 	Samsung:        "Samsung Internet",
@@ -51,6 +59,12 @@ var BrowserName = struct {
 	WeChat:         "WeChat",
 	QQBrowser:      "QQBrowser",
 	Baidu:          "Baidu",
+	Aloha:          "Aloha",
+	Avira:          "Avira Secure Browser",
+	HiBrowser:      "HiBrowser",
+	Lighthouse:     "Lighthouse",
+	Luakit:         "Luakit",
+	Norton:         "Norton Private Browser",
 }
 
 // BrowserType constants for browser types
@@ -124,6 +138,9 @@ var DeviceVendor = struct {
 	Apple      string
 	Asus       string
 	BlackBerry string
+	Blackview  string
+	Coolpad    string
+	Cubot      string
 	Google     string
 	Huawei     string
 	Lenovo     string
@@ -135,12 +152,16 @@ var DeviceVendor = struct {
 	Oppo       string
 	Samsung    string
 	Sony       string
+	TMobile    string
 	Xiaomi     string
 }{
 	Amazon:     "Amazon",
 	Apple:      "Apple",
 	Asus:       "ASUS",
 	BlackBerry: "BlackBerry",
+	Blackview:  "Blackview",
+	Coolpad:    "Coolpad",
+	Cubot:      "CUBOT",
 	Google:     "Google",
 	Huawei:     "Huawei",
 	Lenovo:     "Lenovo",
@@ -152,12 +173,14 @@ var DeviceVendor = struct {
 	Oppo:       "OPPO",
 	Samsung:    "Samsung",
 	Sony:       "Sony",
+	TMobile:    "T-Mobile",
 	Xiaomi:     "Xiaomi",
 }
 
 // EngineName constants for browser engine names
 var EngineName = struct {
 	Blink    string
+	Dillo    string
 	EdgeHTML string
 	Gecko    string
 	Presto   string
@@ -165,6 +188,7 @@ var EngineName = struct {
 	WebKit   string
 }{
 	Blink:    "Blink",
+	Dillo:    "Dillo",
 	EdgeHTML: "EdgeHTML",
 	Gecko:    "Gecko",
 	Presto:   "Presto",
@@ -179,6 +203,7 @@ var OSName = struct {
 	iOS          string
 	Linux        string
 	MacOS        string
+	VegaOS       string
 	Windows      string
 	WindowsPhone string
 }{
@@ -187,6 +212,7 @@ var OSName = struct {
 	iOS:          "iOS",
 	Linux:        "Linux",
 	MacOS:        "macOS",
+	VegaOS:       "Vega OS",
 	Windows:      "Windows",
 	WindowsPhone: "Windows Phone",
 }

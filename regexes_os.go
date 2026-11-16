@@ -172,7 +172,7 @@ var osRegexes = []RegexRule{
 	// Firefox OS
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`mozilla\/[\d\.]+ \((?:mobile|tablet|tv|mobile; [\w ]+); rv:.+ gecko\/([\w\.]+)`),
+			MustCompile(`mozilla\/[\d\.]+ \((?:mobile[;\w ]*|tablet|tv|[^\)]*(?:viera|lg(?:l25|-d300)|alcatel ?o.+|y300-f1)); rv:([\w\.]+)\).+gecko\/`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -218,7 +218,7 @@ var osRegexes = []RegexRule{
 	// watchOS
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`watch(?: ?os[,\/]|\d,\d\/)([\d\.]+)`),
+			MustCompile(`watch(?: ?os[,\/ ]|\d,\d\/)([\d\.]+)`),
 		},
 		Props: []interface{}{
 			PropVersion,
@@ -228,17 +228,21 @@ var osRegexes = []RegexRule{
 	// Chrome OS
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`(cros) [\w]+(?:\)| ([\w\.]+)\b)`),
+			MustCompile(`cros [\w]+(?:\)| ([\w\.]+)\b)`),
 		},
 		Props: []interface{}{
-			PropMapper{Prop: PropName, Value: "Chrome OS"},
 			PropVersion,
+			PropMapper{Prop: PropName, Value: "Chrome OS"},
 		},
+	},
+	// Vega OS
+	{
+		Regexes: []*Regexp2{MustCompile(`kepler ([\w\.]+); (aft|aeo)`)},
+		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: "Vega OS"}},
 	},
 	// Smart TVs and Consoles
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`panasonic;(viera)`),
 			MustCompile(`(netrange)mmh`),
 			MustCompile(`(nettv)\/(\d+\.[\w\.]+)`),
 			MustCompile(`(nintendo|playstation) (\w+)`),

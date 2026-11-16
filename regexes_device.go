@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// tmTabletModelRe 判断 T-Mobile 型号是否为平板（型号含 "tab" 或 "tb"）。
+var tmTabletModelRe = regexp.MustCompile(`(?i)ta?b`)
+
 var deviceRegexes = []RegexRule{
 	// Samsung Tablets
 	{
@@ -124,7 +127,7 @@ var deviceRegexes = []RegexRule{
 			MustCompile(`\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui`),
 			MustCompile(`oid[^\)]+; (redmi[\-_ ]?(?:note|k)?[\w_ ]+|m?[12]\d[01]\d\w{3,6}|poco[\w ]+|(shark )?\w{3}-[ah]0|qin ?[1-3](s\+|ultra| pro)?)( bui|; wv|\))`),
 			MustCompile(`\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note|max|cc)?[_ ]?(?:\d{0,2}\w?)[_ ]?(?:plus|se|lite|pro)?( 5g|lte)?)(?: bui|\))`),
-			MustCompile(` ([\w ]+) miui\/v?\d`),
+			MustCompile(`; ([\w ]+) miui\/v?\d`),
 		},
 		Props: []interface{}{
 			PropMapper{Prop: PropModel, Pattern: regexp.MustCompile(`_`), Replace: " "},
@@ -144,7 +147,7 @@ var deviceRegexes = []RegexRule{
 	// OnePlus
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`droid.+; (cph2[3-6]\d[13579]|((gm|hd)19|(ac|be|in|kb)20|(d[en]|eb|le|mt)21|ne22)[0-2]\d|p[g-k]\w[1m]10)\b`),
+			MustCompile(`droid.+; (cph2[3-6]\d[13579]|((gm|hd)19|(ac|be|in|kb)20|(d[en]|eb|le|mt)21|ne22)[0-2]\d|p[g-l]\w[1m]10)\b`),
 			MustCompile(`(?:one)?(?:plus)? (a\d0\d\d)(?: b|\))`),
 		},
 		Props: []interface{}{
@@ -254,7 +257,7 @@ var deviceRegexes = []RegexRule{
 	},
 	// LG Tablets
 	{
-		Regexes: []*Regexp2{MustCompile(`((?=lg)?[vl]k\-?\d{3}) bui| 3\.[-\w; ]{10}lg?-([06cv9]{3,4})`)},
+		Regexes: []*Regexp2{MustCompile(`\b(?:lg)?([vl]k\-?\d{3}) bui| 3\.[-\w; ]{10}lg?-([06cv9]{3,4})`)},
 		Props: []interface{}{
 			PropModel,
 			PropMapper{Prop: PropVendor, Value: VendorLG},
@@ -562,6 +565,18 @@ var deviceRegexes = []RegexRule{
 			PropMapper{Prop: PropType, Value: DeviceMobile},
 		},
 	},
+	// Blackview
+	{
+		Regexes: []*Regexp2{
+			MustCompile(`blackview ([-\w ]+)( b|\))`),
+			MustCompile(`; (bv\d{4}[-\w ]*)( b|\))`),
+		},
+		Props: []interface{}{
+			PropModel,
+			PropMapper{Prop: PropVendor, Value: "Blackview"},
+			PropMapper{Prop: PropType, Value: DeviceMobile},
+		},
+	},
 	// HMD
 	{
 		Regexes: []*Regexp2{MustCompile(`; (n159v)`)},
@@ -569,6 +584,20 @@ var deviceRegexes = []RegexRule{
 			PropModel,
 			PropMapper{Prop: PropVendor, Value: "HMD"},
 			PropMapper{Prop: PropType, Value: DeviceMobile},
+		},
+	},
+	// T-Mobile
+	{
+		Regexes: []*Regexp2{MustCompile(`((revvl[ \w\+]+|tm(?:rv|af)\w*[45]g(?:tb)?))( b|\))`)},
+		Props: []interface{}{
+			PropModel,
+			PropMapper{Prop: PropType, Fn: func(m string) string {
+				if tmTabletModelRe.MatchString(m) {
+					return DeviceTablet
+				}
+				return DeviceMobile
+			}},
+			PropMapper{Prop: PropVendor, Value: "T-Mobile"},
 		},
 	},
 	// Mixed Tablets (IMO, Infinix, Tecno)
@@ -587,7 +616,7 @@ var deviceRegexes = []RegexRule{
 	{
 		Regexes: []*Regexp2{
 			MustCompile(`(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus(?! zenw)|dell|jolla|meizu|motorola|polytron|tecno|micromax|advan)[-_ ]?([-\w]*)`),
-			MustCompile(`; (blu|hmd|imo|infinix|lava|oneplus|tcl|wiko)[_ ]([\w\+ ]+?)(?: bui|\)|; r)`),
+			MustCompile(`; (blu|coolpad|cubot|hmd|imo|infinix|lava|oneplus|tcl|wiko)[_ ]([-\w\+ ]+?)(?: bui|\)|; r)`),
 			MustCompile(`(hp) ([\w ]+\w)`),
 			MustCompile(`(microsoft); (lumia[\w ]+)`),
 			MustCompile(`(oppo) ?([\w ]+) bui`),

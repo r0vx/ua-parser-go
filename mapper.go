@@ -240,6 +240,19 @@ var windowsVersionMap = map[string]interface{}{
 	"NT":      "",
 }
 
+// Browser hints map：把 Sec-CH-UA 中的品牌名映射回标准浏览器名。
+var browserHintsMap = map[string]interface{}{
+	"Chrome":          "Google Chrome",
+	"Edge":            "Microsoft Edge",
+	"Edge WebView2":   "Microsoft Edge WebView2",
+	"Chrome WebView":  "Android WebView",
+	"Chrome Headless": "HeadlessChrome",
+	"Huawei Browser":  "HuaweiBrowser",
+	"MIUI Browser":    "Miui Browser",
+	"Opera Mobi":      "OperaMobile",
+	"Yandex":          "YaBrowser",
+}
+
 // Form factors map
 var formFactorsMap = map[string]interface{}{
 	DeviceEmbedded: "Automotive",

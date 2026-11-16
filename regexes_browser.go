@@ -51,7 +51,11 @@ var browserRegexes = []RegexRule{
 	// Edge WebView
 	{
 		Regexes: []*Regexp2{MustCompile(`webview.+edge\/([\w\.]+)`)},
-		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: BrowserEdge + " WebView"}},
+		Props: []interface{}{
+			PropVersion,
+			PropMapper{Prop: PropName, Value: BrowserEdge + " WebView"},
+			PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+		},
 	},
 	// Edge
 	{
@@ -105,8 +109,9 @@ var browserRegexes = []RegexRule{
 	// Various browsers
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`(atlas|flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|duckduckgo|klar|helio|(?=comodo_)?dragon|otter|dooble|(?:lg |qute)browser|palemoon)\/([-\w\.]+)`),
-			MustCompile(`(heytap|ovi|115|surf|qwant)browser\/([\d\.]+)`),
+			MustCompile(`(atlas|flock|rockmelt|midori|epiphany|silk|skyfire|bolt|iron|vivaldi|iridium|phantomjs|bowser|qupzilla|falkon|rekonq|puffin|whale(?!.+naver)|qqbrowserlite|duckduckgo|klar|helio|(?=comodo_)?dragon|otter|dooble|(?:hi|lg |ovi|qute)browser|palemoon)\/v?([-\w\.]+)`),
+			MustCompile(`(brave)(?: chrome)?\/([\d\.]+)`),
+			MustCompile(`(aloha|heytap|ovi|115|surf|qwant)browser\/([\d\.]+)`),
 			MustCompile(`(qwant)(?:ios|mobile)\/([\d\.]+)`),
 			MustCompile(`(ecosia|weibo)(?:__| \w+@)([\d\.]+)`),
 		},
@@ -124,7 +129,7 @@ var browserRegexes = []RegexRule{
 	},
 	// UCBrowser
 	{
-		Regexes: []*Regexp2{MustCompile(`(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)`)},
+		Regexes: []*Regexp2{MustCompile(`(?:\buc? ?browser|(?:juc.+)ucweb| ucpc)[\/ ]?([\w\.]+)`)},
 		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: "UCBrowser"}},
 	},
 	// WeChat
@@ -156,22 +161,32 @@ var browserRegexes = []RegexRule{
 		Regexes: []*Regexp2{MustCompile(`slbrowser\/([\w\.]+)`)},
 		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: "Smart " + VendorLenovo + SuffixBrowser}},
 	},
-	// Avast/AVG Secure Browser
+	// Avast/AVG/Avira Secure Browser
 	{
-		Regexes: []*Regexp2{MustCompile(`(avast|avg)\/([\w\.]+)`)},
+		Regexes: []*Regexp2{MustCompile(`(av(?:ast|g|ira))\/([\w\.]+)`)},
 		Props: []interface{}{
 			PropMapper{Prop: PropName, Fn: func(m string) string { return m + " Secure" + SuffixBrowser }},
 			PropVersion,
 		},
+	},
+	// Norton Private Browser
+	{
+		Regexes: []*Regexp2{MustCompile(`norton\/([\w\.]+)`)},
+		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: "Norton Private" + SuffixBrowser}},
 	},
 	// Firefox Focus
 	{
 		Regexes: []*Regexp2{MustCompile(`\bfocus\/([\w\.]+)`)},
 		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: BrowserFirefox + " Focus"}},
 	},
+	// Opera Neon
+	{
+		Regexes: []*Regexp2{MustCompile(` mms\/([\w\.]+)$`)},
+		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: BrowserOpera + " Neon"}},
+	},
 	// Opera Touch
 	{
-		Regexes: []*Regexp2{MustCompile(`\bopt\/([\w\.]+)`)},
+		Regexes: []*Regexp2{MustCompile(` opt\/([\w\.]+)$`)},
 		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: BrowserOpera + " Touch"}},
 	},
 	// Coc Coc Browser
@@ -220,6 +235,11 @@ var browserRegexes = []RegexRule{
 			PropVersion,
 		},
 	},
+	// Huawei Browser
+	{
+		Regexes: []*Regexp2{MustCompile(` HBPC\/([\w\.]+)`)},
+		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: VendorHuawei + SuffixBrowser}},
+	},
 	// Samsung Internet
 	{
 		Regexes: []*Regexp2{MustCompile(`samsungbrowser\/([\w\.]+)`)},
@@ -244,16 +264,15 @@ var browserRegexes = []RegexRule{
 		},
 		Props: []interface{}{PropName, PropVersion},
 	},
-	// LieBao Browser/Rekonq/Steam
+	// LieBao Browser/Luakit/Rekonq/Steam
 	{
-		Regexes: []*Regexp2{MustCompile(`(lbbrowser|rekonq|steam(?= (clie|tenf|gameo)))`)},
+		Regexes: []*Regexp2{MustCompile(`(lbbrowser|luakit|rekonq|steam(?= (clie|tenf|gameo)))`)},
 		Props:   []interface{}{PropName},
 	},
 	// Iron, 360
 	{
 		Regexes: []*Regexp2{
-			MustCompile(`ome\/([\w\.]+) \w* ?(iron) saf`),
-			MustCompile(`ome\/([\w\.]+).+qihu (360)[es]e`),
+			MustCompile(`ome\/([\w\.]+).+(iron(?= saf)|360(?=[es]e$))`),
 		},
 		Props: []interface{}{PropVersion, PropName},
 	},
@@ -288,7 +307,7 @@ var browserRegexes = []RegexRule{
 	},
 	// TikTok
 	{
-		Regexes: []*Regexp2{MustCompile(`musical_ly(?:.+app_?version\/|_)([\w\.]+)`)},
+		Regexes: []*Regexp2{MustCompile(`(?:musical_ly|trill)(?:.+app_?version\/|_)([\w\.]+)`)},
 		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: "TikTok"}, PropMapper{Prop: PropType, Value: BrowserTypeInApp}},
 	},
 	// LinkedIn
@@ -306,6 +325,11 @@ var browserRegexes = []RegexRule{
 		Regexes: []*Regexp2{MustCompile(`(chromium)[\/ ]([-\w\.]+)`)},
 		Props:   []interface{}{PropName, PropVersion},
 	},
+	// Chrome Lighthouse
+	{
+		Regexes: []*Regexp2{MustCompile(`ome-(lighthouse)$`)},
+		Props:   []interface{}{PropName, PropMapper{Prop: PropType, Value: BrowserTypeFetcher}},
+	},
 	// Chrome Headless
 	{
 		Regexes: []*Regexp2{MustCompile(`headlesschrome(?:\/([\w\.]+)| )`)},
@@ -314,12 +338,20 @@ var browserRegexes = []RegexRule{
 	// Edge WebView2
 	{
 		Regexes: []*Regexp2{MustCompile(`wv\).+chrome\/([\w\.]+).+edgw\/`)},
-		Props:   []interface{}{PropVersion, PropMapper{Prop: PropName, Value: BrowserEdge + " WebView2"}},
+		Props: []interface{}{
+			PropVersion,
+			PropMapper{Prop: PropName, Value: BrowserEdge + " WebView2"},
+			PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+		},
 	},
 	// Chrome WebView
 	{
-		Regexes: []*Regexp2{MustCompile(` wv\).+(chrome)\/([\w\.]+)`)},
-		Props:   []interface{}{PropMapper{Prop: PropName, Value: BrowserChrome + " WebView"}, PropVersion},
+		Regexes: []*Regexp2{MustCompile(`; wv\).+(chrome)\/([\w\.]+)`)},
+		Props: []interface{}{
+			PropMapper{Prop: PropName, Value: BrowserChrome + " WebView"},
+			PropVersion,
+			PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+		},
 	},
 	// Android Browser
 	{

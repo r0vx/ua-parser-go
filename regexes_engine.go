@@ -22,7 +22,7 @@ var engineRegexes = []RegexRule{
 			MustCompile(`(presto)\/([\w\.]+)`),
 			MustCompile(`(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna|servo)\/([\w\.]+)`),
 			MustCompile(`ekioh(flow)\/([\w\.]+)`),
-			MustCompile(`(khtml|tasman|links)[\/ ]\(?([\w\.]+)`),
+			MustCompile(`(khtml|tasman|links|dillo)[\/ ]\(?([\w\.]+)`),
 			MustCompile(`(icab)[\/ ]([23]\.[\d\.]+)`),
 		},
 		Props: []interface{}{PropName, PropVersion},

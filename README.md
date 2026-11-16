@@ -10,7 +10,7 @@
 - ⚡ **高性能**：完整解析仅需 ~0.5ms
 - 🔒 **类型安全**：利用 Go 的强类型系统
 - 🌐 **全面支持**：识别 100+ 种浏览器、设备和操作系统
-- 🧪 **测试完善**：通过全部 1563 个原版测试用例
+- 🧪 **测试完善**：通过全部 1604 个原版测试用例
 
 ## 📊 准确率
 
@@ -18,12 +18,12 @@
 
 | 模块 | 通过 | 总数 | 准确率 |
 |------|------|------|--------|
-| 浏览器检测 | 282 | 282 | **100%** ✅ |
-| 操作系统检测 | 258 | 258 | **100%** ✅ |
-| 设备检测 | 963 | 963 | **100%** ✅ |
-| 引擎检测 | 21 | 21 | **100%** ✅ |
+| 浏览器检测 | 294 | 294 | **100%** ✅ |
+| 操作系统检测 | 269 | 269 | **100%** ✅ |
+| 设备检测 | 980 | 980 | **100%** ✅ |
+| 引擎检测 | 22 | 22 | **100%** ✅ |
 | CPU架构检测 | 39 | 39 | **100%** ✅ |
-| **总计** | **1563** | **1563** | **100%** ✅ |
+| **总计** | **1604** | **1604** | **100%** ✅ |
 
 ## 🚀 快速开始
 
@@ -110,6 +110,12 @@ result := uaparser.Parse("Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/
 #### `New(ua string) *UAParser`
 创建解析器实例，支持按需解析。
 
+#### `ParseWithClientHints(ua string, headers map[string]string) *Result`
+解析 UA 并叠加 Sec-CH-UA* 客户端提示；`ua` 为空时取 `user-agent` 头。
+
+#### `ParseWithHTTPHeaders(ua string, headers http.Header) *Result`
+`ParseWithClientHints` 的 `http.Header` 版本。
+
 ### Parser 方法
 
 - `GetBrowser() Browser` - 获取浏览器信息
@@ -120,6 +126,41 @@ result := uaparser.Parse("Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/
 - `GetResult() *Result` - 获取完整解析结果
 - `SetUA(ua string) *UAParser` - 设置新的 UA 字符串
 - `GetUA() string` - 获取当前 UA 字符串
+- `SetClientHints(ch ClientHints) *UAParser` - 叠加客户端提示
+
+### Client Hints（Sec-CH-UA*）
+
+服务端读取 Chromium 的 Client Hints 请求头，结果比 UA 字符串更准确：
+
+```go
+// HTTP 服务端
+result := uaparser.ParseWithHTTPHeaders("", r.Header)
+
+// 或用普通 map（头名称大小写不敏感）
+result := uaparser.ParseWithClientHints("", map[string]string{
+    "sec-ch-ua":          `"Chromium";v="130", "Google Chrome";v="130"`,
+    "sec-ch-ua-platform": `"Windows"`,
+    "user-agent":         ua,
+})
+
+// 或复用解析器
+p := uaparser.New(ua).SetClientHints(uaparser.NewClientHints(headers))
+browser := p.GetBrowser()
+```
+
+支持的请求头：
+
+```
+sec-ch-ua, sec-ch-ua-full-version-list, sec-ch-ua-mobile,
+sec-ch-ua-model, sec-ch-ua-platform, sec-ch-ua-platform-version,
+sec-ch-ua-arch, sec-ch-ua-bitness, sec-ch-ua-form-factors
+```
+
+- 未提供 CH 头时自动回退到 UA 解析结果。
+- `ua` 参数为空时使用 `user-agent` 头。
+- 头值先去除引号并截断到 500 字符，规避超长头导致的正则开销。
+- 高熵字段（型号、平台版本、架构等）需服务端返回 `Accept-CH` 响应头后客户端才会发送：
+  `Accept-CH: Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-UA-Platform-Version, Sec-CH-UA-Arch, Sec-CH-UA-Bitness, Sec-CH-UA-Form-Factors`
 
 ### 数据结构
 
@@ -249,7 +290,7 @@ BenchmarkGetBrowser-12    5362    223390 ns/op    1040 B/op    17 allocs/op
 # 运行所有测试
 go test -v ./...
 
-# 运行完整验证测试（1563 个用例）
+# 运行完整验证测试（1604 个用例）
 go test -v -run='TestFull'
 
 # 运行基准测试
@@ -283,7 +324,7 @@ ua-parser-go/
 
 ## 🤝 对比原始项目
 
-本项目是 [ua-parser-js](https://github.com/faisalman/ua-parser-js) v2.0.7 的 Go 完整移植版本。
+本项目是 [ua-parser-js](https://github.com/faisalman/ua-parser-js) v2.0.10 的 Go 完整移植版本。
 
 ### 优势
 - ✅ 编译型语言，性能更高
@@ -294,7 +335,8 @@ ua-parser-go/
 
 ### 差异
 - 空值使用空字符串 `""` 而非 JavaScript 的 `undefined`
-- 目前不支持 Client Hints (UACH)
+- Client Hints 通过 `ParseWithHTTPHeaders` / `SetClientHints` 显式启用，默认只解析 UA
+- 尚未移植：`useExtension()`、`extensions` / `helpers` 子模块
 
 ## 📝 许可证
 
