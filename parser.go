@@ -42,7 +42,9 @@ const (
 
 // Browser types
 const (
-	BrowserTypeInApp = "inapp"
+	BrowserTypeCLI     = "cli"
+	BrowserTypeCrawler = "crawler"
+	BrowserTypeInApp   = "inapp"
 	// BrowserTypeFetcher marks fetching tools such as Chrome Lighthouse.
 	BrowserTypeFetcher = "fetcher"
 )
@@ -98,8 +100,14 @@ type Result struct {
 
 // UAParser is the main parser struct
 type UAParser struct {
-	ua string
-	ch *ClientHints
+	ua    string
+	ch    *ClientHints
+	rules *ruleSet
+}
+
+// ruleSet 保存叠加扩展后的规则集；nil 时使用核心规则。
+type ruleSet struct {
+	browser, cpu, device, engine, os []RegexRule
 }
 
 // New creates a new UAParser with the given user agent string
@@ -132,10 +140,49 @@ func ParseWithHTTPHeaders(ua string, headers http.Header) *Result {
 	return New(ua).SetClientHints(NewClientHintsFromHTTP(headers)).GetResult()
 }
 
+// UseExtension 在核心规则之前追加扩展规则，可多次调用；后加入的扩展优先。
+func (p *UAParser) UseExtension(exts ...Extension) *UAParser {
+	if p.rules == nil {
+		p.rules = &ruleSet{
+			browser: browserRegexes,
+			cpu:     cpuRegexes,
+			device:  deviceRegexes,
+			engine:  engineRegexes,
+			os:      osRegexes,
+		}
+	}
+	for _, ext := range exts {
+		p.rules.browser = prependRules(ext.Browser, p.rules.browser)
+		p.rules.cpu = prependRules(ext.CPU, p.rules.cpu)
+		p.rules.device = prependRules(ext.Device, p.rules.device)
+		p.rules.engine = prependRules(ext.Engine, p.rules.engine)
+		p.rules.os = prependRules(ext.OS, p.rules.os)
+	}
+	return p
+}
+
+// prependRules 返回 extra 在前、base 在后的新切片，避免修改调用方切片。
+func prependRules(extra, base []RegexRule) []RegexRule {
+	if len(extra) == 0 {
+		return base
+	}
+	merged := make([]RegexRule, 0, len(extra)+len(base))
+	merged = append(merged, extra...)
+	return append(merged, base...)
+}
+
 // SetClientHints 设置客户端提示，后续 Get* 会在 UA 解析结果上叠加。
 func (p *UAParser) SetClientHints(ch ClientHints) *UAParser {
 	p.ch = &ch
 	return p
+}
+
+// rulesFor 返回叠加扩展后的规则；未使用扩展时回退到核心规则。
+func (p *UAParser) rulesFor(pick func(*ruleSet) []RegexRule, fallback []RegexRule) []RegexRule {
+	if p.rules == nil {
+		return fallback
+	}
+	return pick(p.rules)
 }
 
 // SetUA sets the user agent string
@@ -155,7 +202,7 @@ func (p *UAParser) GetUA() string {
 // GetBrowser returns browser information
 func (p *UAParser) GetBrowser() Browser {
 	browser := Browser{}
-	rgxMapper(&browser, p.ua, browserRegexes)
+	rgxMapper(&browser, p.ua, p.rulesFor(func(r *ruleSet) []RegexRule { return r.browser }, browserRegexes))
 	if browser.Version != "" {
 		browser.Major = majorize(browser.Version)
 	}
@@ -168,7 +215,7 @@ func (p *UAParser) GetBrowser() Browser {
 // GetCPU returns CPU architecture information
 func (p *UAParser) GetCPU() CPU {
 	cpu := CPU{}
-	rgxMapper(&cpu, p.ua, cpuRegexes)
+	rgxMapper(&cpu, p.ua, p.rulesFor(func(r *ruleSet) []RegexRule { return r.cpu }, cpuRegexes))
 	if p.ch != nil {
 		applyCPUCH(&cpu, p.ch)
 	}
@@ -178,7 +225,7 @@ func (p *UAParser) GetCPU() CPU {
 // GetDevice returns device information
 func (p *UAParser) GetDevice() Device {
 	device := Device{}
-	rgxMapper(&device, p.ua, deviceRegexes)
+	rgxMapper(&device, p.ua, p.rulesFor(func(r *ruleSet) []RegexRule { return r.device }, deviceRegexes))
 	if p.ch != nil {
 		applyDeviceCH(&device, p.ch)
 	}
@@ -188,7 +235,7 @@ func (p *UAParser) GetDevice() Device {
 // GetEngine returns browser engine information
 func (p *UAParser) GetEngine() Engine {
 	engine := Engine{}
-	rgxMapper(&engine, p.ua, engineRegexes)
+	rgxMapper(&engine, p.ua, p.rulesFor(func(r *ruleSet) []RegexRule { return r.engine }, engineRegexes))
 	if p.ch != nil {
 		applyEngineCH(&engine, p.ch)
 	}
@@ -198,7 +245,7 @@ func (p *UAParser) GetEngine() Engine {
 // GetOS returns operating system information
 func (p *UAParser) GetOS() OS {
 	os := OS{}
-	rgxMapper(&os, p.ua, osRegexes)
+	rgxMapper(&os, p.ua, p.rulesFor(func(r *ruleSet) []RegexRule { return r.os }, osRegexes))
 
 	// Since iOS 26, Safari's UA reports the OS version as frozen at 18:
 	// https://webkit.org/blog/17333/webkit-features-in-safari-26-0/#update-to-ua-string

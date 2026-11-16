@@ -127,6 +127,34 @@ result := uaparser.Parse("Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/
 - `SetUA(ua string) *UAParser` - 设置新的 UA 字符串
 - `GetUA() string` - 获取当前 UA 字符串
 - `SetClientHints(ch ClientHints) *UAParser` - 叠加客户端提示
+- `UseExtension(exts ...Extension) *UAParser` - 追加自定义或预置扩展规则
+
+### 扩展规则（useExtension）
+
+扩展规则优先于核心规则；多条扩展按参数顺序、后加入者优先。
+
+```go
+// 预置扩展集
+b := uaparser.New(ua).
+    UseExtension(uaparser.Crawlers).
+    GetBrowser()
+
+// 自定义规则
+custom := uaparser.Extension{
+    Browser: []uaparser.RegexRule{{
+        Regexes: []*uaparser.Regexp2{uaparser.MustCompile(`myapp\/([\w\.]+)`)},
+        Props: []interface{}{
+            uaparser.PropMapper{Prop: uaparser.PropName, Value: "MyApp"},
+            uaparser.PropVersion,
+            uaparser.PropMapper{Prop: uaparser.PropType, Value: "inapp"},
+        },
+    }},
+}
+b := uaparser.New(ua).UseExtension(custom).GetBrowser()
+```
+
+预置扩展集：`CLIs`（wget/curl/Lynx/ELinks/HTTPie/PowerShell）、`Crawlers`（搜索引擎与 AI 爬虫）、`Fetchers`（链接预览、抓取、截图类客户端，含 WhatsApp OS 识别）。
+
 
 ### Client Hints（Sec-CH-UA*）
 
@@ -336,7 +364,7 @@ ua-parser-go/
 ### 差异
 - 空值使用空字符串 `""` 而非 JavaScript 的 `undefined`
 - Client Hints 通过 `ParseWithHTTPHeaders` / `SetClientHints` 显式启用，默认只解析 UA
-- 尚未移植：`useExtension()`、`extensions` / `helpers` 子模块
+- 尚未移植：`helpers` 子模块；`extensions` 中的 `Emails` / `Mediaplayers` / `Libraries` / `Vehicles` / `ExtraDevices` / `InApps` / `Bots` 规则集
 
 ## 📝 许可证
 
