@@ -123,6 +123,82 @@ func TestInApps(t *testing.T) {
 	}
 }
 
+// readExtensionCases 读取浏览器类扩展测试数据。
+func readExtensionCases(t *testing.T, file string) []extensionCase {
+	t.Helper()
+	data, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatalf("读取测试数据失败: %v", err)
+	}
+	var cases []extensionCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatalf("解析测试数据失败: %v", err)
+	}
+	return cases
+}
+
+// assertBrowserCases 逐条校验浏览器名称、版本与类型。
+func assertBrowserCases(t *testing.T, cases []extensionCase, ext Extension, checkType bool) {
+	t.Helper()
+	for _, tc := range cases {
+		expectName := normalizeUndefined(tc.Expect.Name)
+		expectVersion := normalizeUndefined(tc.Expect.Version)
+		expectMajor := normalizeUndefined(tc.Expect.Major)
+		expectType := normalizeUndefined(tc.Expect.Type)
+		b := New(tc.UA).UseExtension(ext).GetBrowser()
+		if b.Name != expectName {
+			t.Errorf("%s: name = %q, want %q", tc.Desc, b.Name, expectName)
+		}
+		if b.Version != expectVersion {
+			t.Errorf("%s: version = %q, want %q", tc.Desc, b.Version, expectVersion)
+		}
+		if expectMajor != "" && b.Major != expectMajor {
+			t.Errorf("%s: major = %q, want %q", tc.Desc, b.Major, expectMajor)
+		}
+		if checkType && b.Type != expectType {
+			t.Errorf("%s: type = %q, want %q", tc.Desc, b.Type, expectType)
+		}
+	}
+}
+
+// TestEmails 用上游测试数据校验 Emails 规则。
+func TestEmails(t *testing.T) {
+	assertBrowserCases(t, readExtensionCases(t, "testdata/extensions/email.json"), Emails, true)
+}
+
+// TestMediaPlayers 校验 MediaPlayers 规则。
+// 上游未把该数据接入测试，期望值取自 2.0.10 实际输出快照。
+func TestMediaPlayers(t *testing.T) {
+	assertBrowserCases(t, readExtensionCases(t, "testdata/extensions/mediaplayer.json"), MediaPlayers, true)
+}
+
+// TestVehicles 用上游测试数据校验 Vehicles 设备规则。
+func TestVehicles(t *testing.T) {
+	data, err := os.ReadFile("testdata/extensions/vehicle.json")
+	if err != nil {
+		t.Fatalf("读取测试数据失败: %v", err)
+	}
+	var cases []DeviceTestCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatalf("解析测试数据失败: %v", err)
+	}
+	for _, tc := range cases {
+		expectVendor := normalizeUndefined(tc.Expect.Vendor)
+		expectModel := normalizeUndefined(tc.Expect.Model)
+		expectType := normalizeUndefined(tc.Expect.Type)
+		d := New(tc.UA).UseExtension(Vehicles).GetDevice()
+		if d.Vendor != expectVendor {
+			t.Errorf("%s: vendor = %q, want %q", tc.Desc, d.Vendor, expectVendor)
+		}
+		if d.Model != expectModel {
+			t.Errorf("%s: model = %q, want %q", tc.Desc, d.Model, expectModel)
+		}
+		if d.Type != expectType {
+			t.Errorf("%s: type = %q, want %q", tc.Desc, d.Type, expectType)
+		}
+	}
+}
+
 // TestExtensionPriority 校验扩展规则优先于核心规则，后加入的扩展优先。
 func TestExtensionPriority(t *testing.T) {
 	ua := "MyApp/1.2.3"

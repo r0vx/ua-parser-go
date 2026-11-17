@@ -335,6 +335,149 @@ var InApps = Extension{
 	},
 }
 
+// normalizeEmailName 统一邮件客户端名称。
+func normalizeEmailName(name string) string {
+	switch name {
+	case "YahooMobile", "YahooMail":
+		return "Yahoo Mail"
+	case "K-9":
+		return "K-9 Mail"
+	case "Zdesktop", "zdesktop":
+		return "Zimbra"
+	}
+	return name
+}
+
+// Emails 识别桌面与移动端邮件客户端。
+var Emails = Extension{
+	Browser: []RegexRule{
+		{
+			Regexes: []*Regexp2{MustCompile(`(android)\/([\w\.-]+email)`)},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeEmail},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`((?:air|aqua|blue|claws|daum|fair|fox|k-9|mac|nylas|pegasus|poco|poly|proton|samsung|squirrel|yahoo) ?e?mail(?:-desktop| app| bridge)?|microsoft outlook|r2mail2|spicebird|turnpike|yahoomobile|(?:microsoft )?outlook(?:-express)?|macoutlook|windows-live-mail|alpine|balsa|barca|canary|emclient|eudora|evolution|geary|gnus|horde::imp|incredimail|kmail2?|kontact|lotus-notes|mail(?:bird|mate|spring)|mutt|navermailapp|newton|nine|postbox|rainloop|roundcube webmail|spar(?:row|kdesktop)|sylpheed|the bat!|thunderbird|trojita|tutanota-desktop|wanderlust|zdesktop|zohomail-desktop)(?:m.+ail; |[\/ ])([\w\.-]+)`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropName, Fn: normalizeEmailName},
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeEmail},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(mail)\/([\w\.]+) cf`)},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeEmail},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(zimbra)\/([\w\.-]+)`)},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeEmail},
+			},
+		},
+	},
+}
+
+// MediaPlayers 识别视频/音频播放器。
+var MediaPlayers = Extension{
+	Browser: []RegexRule{
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`(apple(?:coremedia|tv))\/([\w\._]+)`),
+				MustCompile(`(coremedia) v([\w\._]+)`),
+				MustCompile(`(ares|clementine|music player daemon|nexplayer|ossproxy) ([\w\.-]+)`),
+				MustCompile(`^(aqualung|audacious|audimusicstream|amarok|bass|bsplayer|core|gnomemplayer|gvfs|irapp|lyssna|music on console|nero (?:home|scout)|nokia\d+|nsplayer|psp-internetradioplayer|quicktime|rma|radioapp|radioclientapplication|soundtap|stagefright|streamium|totem|videos|xbmc|xine|xmms)\/([\w\.-]+)`),
+				MustCompile(`(lg player|nexplayer) ([\d\.]+)`),
+				MustCompile(`player\/(nexplayer|lg player) ([\w\.-]+)`),
+				MustCompile(`(gstreamer) souphttpsrc.+libsoup\/([\w\.-]+)`),
+				MustCompile(`(htc streaming player) [\w_]+ \/ ([\d\.]+)`),
+				MustCompile(`(lavf)([\d\.]+)`),
+				MustCompile(`(mplayer)(?: |\/)(?:(?:sherpya-){0,1}svn)(?:-| )(r\d+(?:-\d+[\w\.-]+))`),
+				MustCompile(` (songbird)\/([\w\.-]+)`),
+				MustCompile(`(winamp)(?:3 version|mpeg| ) ([\w\.-]+)`),
+				MustCompile(`(vlc)(?:\/| media player - version )([\w\.-]+)`),
+				MustCompile(`^(foobar2000|itunes|smp)\/([\d\.]+)`),
+				MustCompile(`com\.(riseupradioalarm)\/([\d\.]*)`),
+				MustCompile(`(mplayer)(?:\s|\/| unknown-)([\w\.\-]+)`),
+				MustCompile(`(windows)\/([\w\.-]+) upnp\/[\d\.]+ dlnadoc\/[\d\.]+ home media server`),
+			},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeMediaPlayer},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(flrp)\/([\w\.-]+)`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropName, Value: "Flip Player"},
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeMediaPlayer},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(fstream|media player classic|inlight radio|mplayer|nativehost|nero showtime|ocms-bot|queryseekspider|tapinradio|tunein radio|winamp|yourmuze)`)},
+			Props: []interface{}{
+				PropName,
+				PropMapper{Prop: PropType, Value: BrowserTypeMediaPlayer},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(htc_one_s|windows-media-player|wmplayer)\/([\w\.-]+)`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropName, Pattern: regexp.MustCompile(`[_-]`), Replace: " "},
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeMediaPlayer},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(rad.io|radio.(?:de|at|fr)) ([\d\.]+)`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropName, Value: "rad.io"},
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeMediaPlayer},
+			},
+		},
+	},
+}
+
+// Vehicles 识别车载设备。
+var Vehicles = Extension{
+	Device: []RegexRule{
+		{
+			Regexes: []*Regexp2{MustCompile(`aftlbt962e2`)},
+			Props:   []interface{}{PropMapper{Prop: PropVendor, Value: "BMW"}},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`dilink.+(byd) auto`)},
+			Props:   []interface{}{PropVendor},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`aftlft962x3`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropVendor, Value: "Jeep"},
+				PropMapper{Prop: PropModel, Value: "Wagooner"},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(rivian) (r1t)`)},
+			Props:   []interface{}{PropVendor, PropModel},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`vcc.+netfront`)},
+			Props:   []interface{}{PropMapper{Prop: PropVendor, Value: "Volvo"}},
+		},
+	},
+}
+
 // Libraries 识别 HTTP 客户端与库（Scrapy、axios、node-fetch 等）。
 var Libraries = Extension{
 	Browser: []RegexRule{

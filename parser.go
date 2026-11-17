@@ -42,10 +42,12 @@ const (
 
 // Browser types
 const (
-	BrowserTypeCLI     = "cli"
-	BrowserTypeCrawler = "crawler"
-	BrowserTypeInApp   = "inapp"
-	BrowserTypeLibrary = "library"
+	BrowserTypeCLI         = "cli"
+	BrowserTypeCrawler     = "crawler"
+	BrowserTypeEmail       = "email"
+	BrowserTypeInApp       = "inapp"
+	BrowserTypeLibrary     = "library"
+	BrowserTypeMediaPlayer = "mediaplayer"
 	// BrowserTypeFetcher marks fetching tools such as Chrome Lighthouse.
 	BrowserTypeFetcher = "fetcher"
 )

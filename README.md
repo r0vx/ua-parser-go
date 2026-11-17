@@ -153,7 +153,7 @@ custom := uaparser.Extension{
 b := uaparser.New(ua).UseExtension(custom).GetBrowser()
 ```
 
-预置扩展集：`CLIs`（wget/curl/Lynx/ELinks/HTTPie/PowerShell）、`Crawlers`（搜索引擎与 AI 爬虫）、`Fetchers`（链接预览、抓取、截图类客户端，含 WhatsApp OS 识别）、`Libraries`（HTTP 客户端与库）、`ExtraDevices`（Nook、RCA、ZTE、Dell 等设备）、`InApps`（Discord、Figma、Slack、VS Code 等应用内浏览器）、`Bots`（CLIs + Fetchers + Crawlers + Libraries 合并）。
+预置扩展集：`CLIs`（wget/curl/Lynx/ELinks/HTTPie/PowerShell）、`Crawlers`（搜索引擎与 AI 爬虫）、`Fetchers`（链接预览、抓取、截图类客户端，含 WhatsApp OS 识别）、`Libraries`（HTTP 客户端与库）、`ExtraDevices`（Nook、RCA、ZTE、Dell 等设备）、`InApps`（Discord、Figma、Slack、VS Code 等应用内浏览器）、`Emails`（Outlook、Thunderbird、Apple Mail 等）、`MediaPlayers`（VLC、MPlayer、Winamp、QuickTime 等）、`Vehicles`（BMW、BYD、Jeep、Rivian、Volvo）、`Bots`（CLIs + Fetchers + Crawlers + Libraries 合并）。
 
 ### 辅助函数（helpers）
 
@@ -381,7 +381,7 @@ ua-parser-go/
 ### 差异
 - 空值使用空字符串 `""` 而非 JavaScript 的 `undefined`
 - Client Hints 通过 `ParseWithHTTPHeaders` / `SetClientHints` 显式启用，默认只解析 UA
-- 尚未移植：`helpers` 的 `IsFromEU` / `IsStandalonePWA`；`extensions` 中的 `Emails` / `Mediaplayers` / `Vehicles` 规则集
+- 尚未移植：`helpers` 的 `IsFromEU` / `IsStandalonePWA`（依赖浏览器时区 / display-mode）
 
 ## 📝 许可证
 
