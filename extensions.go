@@ -84,6 +84,51 @@ var Crawlers = Extension{
 	},
 }
 
+// Libraries 识别 HTTP 客户端与库（Scrapy、axios、node-fetch 等）。
+var Libraries = Extension{
+	Browser: []RegexRule{
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`^((?:apache|go|java)-http-?client|axios|bun|dart|deno|got|(?:guzzle|lua-resty-|ocaml-co|ok)http|hackney|http\.rb|java|jetty|libwww-perl|needle|node(?:\.js|-fetch|-superagent)|php-soap|postmanruntime|python-(?:httpx|urllib[23]?|requests)|rest-client|scrapy)\/([\w\.]+)`),
+				MustCompile(`(adobeair|aiohttp|jsdom)\/([\w\.]+)`),
+				MustCompile(`(nutch)-([\w\.-]+)(\(|$)`),
+				MustCompile(`\((java)\/([\w\.]+)`),
+			},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeLibrary},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(node-fetch|phpcrawl|undici)`)},
+			Props: []interface{}{
+				PropName,
+				PropMapper{Prop: PropType, Value: BrowserTypeLibrary},
+			},
+		},
+	},
+}
+
+// Bots 合并所有机器人相关扩展集（CLIs + Fetchers + Crawlers + Libraries）。
+var Bots = Extension{
+	Browser: mergeRuleLists(CLIs.Browser, Fetchers.Browser, Crawlers.Browser, Libraries.Browser),
+	OS:      Fetchers.OS,
+}
+
+// mergeRuleLists 依次拼接多个规则切片。
+func mergeRuleLists(lists ...[]RegexRule) []RegexRule {
+	total := 0
+	for _, l := range lists {
+		total += len(l)
+	}
+	merged := make([]RegexRule, 0, total)
+	for _, l := range lists {
+		merged = append(merged, l...)
+	}
+	return merged
+}
+
 // Fetchers 识别链接预览、抓取与截图类客户端。
 var Fetchers = Extension{
 	Browser: []RegexRule{

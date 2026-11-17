@@ -45,6 +45,7 @@ const (
 	BrowserTypeCLI     = "cli"
 	BrowserTypeCrawler = "crawler"
 	BrowserTypeInApp   = "inapp"
+	BrowserTypeLibrary = "library"
 	// BrowserTypeFetcher marks fetching tools such as Chrome Lighthouse.
 	BrowserTypeFetcher = "fetcher"
 )

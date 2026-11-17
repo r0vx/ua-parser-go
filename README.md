@@ -153,7 +153,24 @@ custom := uaparser.Extension{
 b := uaparser.New(ua).UseExtension(custom).GetBrowser()
 ```
 
-预置扩展集：`CLIs`（wget/curl/Lynx/ELinks/HTTPie/PowerShell）、`Crawlers`（搜索引擎与 AI 爬虫）、`Fetchers`（链接预览、抓取、截图类客户端，含 WhatsApp OS 识别）。
+预置扩展集：`CLIs`（wget/curl/Lynx/ELinks/HTTPie/PowerShell）、`Crawlers`（搜索引擎与 AI 爬虫）、`Fetchers`（链接预览、抓取、截图类客户端，含 WhatsApp OS 识别）、`Libraries`（HTTP 客户端与库）、`Bots`（上述四者合并）。
+
+### 辅助函数（helpers）
+
+```go
+uaparser.IsBot(ua)              // cli / crawler / fetcher / library
+uaparser.IsAICrawler(ua)        // AI 训练/检索爬虫
+uaparser.IsAIAssistant(ua)      // AI 助手类抓取器
+uaparser.IsChromeFamily(ua)     // Blink 引擎
+uaparser.IsElectron(ua)         // UA 含 Electron
+uaparser.IsFrozenUA(ua)         // 浏览器冻结 UA
+uaparser.GetDeviceVendor(model) // 由型号猜厂商
+uaparser.GetOutlookEdition(name, version)
+uaparser.IsAppleSilicon(result) // 传 *Result；建议配合 Client Hints
+uaparser.IsAppleSiliconUA(ua)   // 仅 UA 的降级判断
+```
+
+`IsFromEU` / `IsStandalonePWA` 依赖浏览器环境（时区、display-mode），未移植。
 
 
 ### Client Hints（Sec-CH-UA*）
@@ -364,7 +381,7 @@ ua-parser-go/
 ### 差异
 - 空值使用空字符串 `""` 而非 JavaScript 的 `undefined`
 - Client Hints 通过 `ParseWithHTTPHeaders` / `SetClientHints` 显式启用，默认只解析 UA
-- 尚未移植：`helpers` 子模块；`extensions` 中的 `Emails` / `Mediaplayers` / `Libraries` / `Vehicles` / `ExtraDevices` / `InApps` / `Bots` 规则集
+- 尚未移植：`helpers` 的 `IsFromEU` / `IsStandalonePWA`；`extensions` 中的 `Emails` / `Mediaplayers` / `Vehicles` / `ExtraDevices` / `InApps` 规则集
 
 ## 📝 许可证
 
