@@ -100,6 +100,80 @@ result := uaparser.Parse("Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/
 // }
 ```
 
+### HTTP 服务端用法
+
+在 handler 中直接解析请求头（推荐，自动叠加 Client Hints）：
+
+```go
+package main
+
+import (
+    "context"
+    "encoding/json"
+    "net/http"
+
+    uaparser "github.com/r0vx/ua-parser-go"
+)
+
+type ctxKey struct{}
+
+// UAMiddleware 把解析结果放入 context，供后续 handler 读取。
+func UAMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // 高熵字段需服务端声明 Accept-CH，客户端才会发送
+        w.Header().Add("Accept-CH",
+            "Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, "+
+                "Sec-CH-UA-Platform-Version, Sec-CH-UA-Arch, "+
+                "Sec-CH-UA-Bitness, Sec-CH-UA-Form-Factors")
+
+        result := uaparser.ParseWithHTTPHeaders("", r.Header)
+        ctx := context.WithValue(r.Context(), ctxKey{}, result)
+        next.ServeHTTP(w, r.WithContext(ctx))
+    })
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    result, _ := r.Context().Value(ctxKey{}).(*uaparser.Result)
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(result)
+}
+```
+
+按需解析、避免一次算全：
+
+```go
+p := uaparser.New(ua).SetClientHints(uaparser.NewClientHints(headers))
+os := p.GetOS()
+device := p.GetDevice()
+```
+
+### 批量处理日志
+
+```go
+f, _ := os.Open("access.log")
+defer f.Close()
+
+p := uaparser.New("").UseExtension(uaparser.Bots) // 复用实例，扩展只注册一次
+scanner := bufio.NewScanner(f)
+for scanner.Scan() {
+    result := p.SetUA(scanner.Text()).GetResult()
+    switch result.Browser.Type {
+    case uaparser.BrowserTypeCrawler, uaparser.BrowserTypeFetcher, uaparser.BrowserTypeCLI:
+        // 爬虫 / 抓取器 / CLI 流量
+    }
+}
+```
+
+按行日志里通常只有 UA 字符串，没有 `Sec-CH-UA*` 头；需要 Client Hints 时用 `ParseWithClientHints(line, headers)`。
+
+### 常见问题
+
+- **Client Hints 没生效**：仅 Chromium 系浏览器发送；高熵字段需服务端返回 `Accept-CH`，反向代理不得剥离 `Sec-CH-UA*`。
+- **非 Chromium 浏览器**：自动回退 UA 解析，结果依然有效。
+- **并发**：`UAParser` 与其 `SetUA` / `SetClientHints` 不是并发安全的；每个 goroutine 用自己的实例，或直接调用 `Parse`。
+- **扩展集**：`UseExtension` 规则优先于核心规则；多个扩展按参数顺序，后加入者优先。
+- **空值**：Go 用 `""`，JSON 标签带 `omitempty`，不会输出 `undefined`。
+
 ## 📖 API 文档
 
 ### 主要函数
