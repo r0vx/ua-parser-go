@@ -69,6 +69,60 @@ func TestExtensionSets(t *testing.T) {
 	}
 }
 
+// TestExtraDevices 用上游测试数据校验 ExtraDevices 设备规则。
+func TestExtraDevices(t *testing.T) {
+	data, err := os.ReadFile("testdata/extensions/extra-devices.json")
+	if err != nil {
+		t.Fatalf("读取测试数据失败: %v", err)
+	}
+	var cases []DeviceTestCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatalf("解析测试数据失败: %v", err)
+	}
+	for _, tc := range cases {
+		expectVendor := normalizeUndefined(tc.Expect.Vendor)
+		expectModel := normalizeUndefined(tc.Expect.Model)
+		expectType := normalizeUndefined(tc.Expect.Type)
+		d := New(tc.UA).UseExtension(ExtraDevices).GetDevice()
+		if d.Vendor != expectVendor {
+			t.Errorf("%s: vendor = %q, want %q", tc.Desc, d.Vendor, expectVendor)
+		}
+		if d.Model != expectModel {
+			t.Errorf("%s: model = %q, want %q", tc.Desc, d.Model, expectModel)
+		}
+		if d.Type != expectType {
+			t.Errorf("%s: type = %q, want %q", tc.Desc, d.Type, expectType)
+		}
+	}
+}
+
+// TestInApps 用上游测试数据校验 InApps 浏览器规则。
+func TestInApps(t *testing.T) {
+	data, err := os.ReadFile("testdata/extensions/inapp.json")
+	if err != nil {
+		t.Fatalf("读取测试数据失败: %v", err)
+	}
+	var cases []extensionCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatalf("解析测试数据失败: %v", err)
+	}
+	for _, tc := range cases {
+		expectName := normalizeUndefined(tc.Expect.Name)
+		expectVersion := normalizeUndefined(tc.Expect.Version)
+		expectType := normalizeUndefined(tc.Expect.Type)
+		b := New(tc.UA).UseExtension(InApps).GetBrowser()
+		if b.Name != expectName {
+			t.Errorf("%s: name = %q, want %q", tc.Desc, b.Name, expectName)
+		}
+		if b.Version != expectVersion {
+			t.Errorf("%s: version = %q, want %q", tc.Desc, b.Version, expectVersion)
+		}
+		if b.Type != expectType {
+			t.Errorf("%s: type = %q, want %q", tc.Desc, b.Type, expectType)
+		}
+	}
+}
+
 // TestExtensionPriority 校验扩展规则优先于核心规则，后加入的扩展优先。
 func TestExtensionPriority(t *testing.T) {
 	ua := "MyApp/1.2.3"

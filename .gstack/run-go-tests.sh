@@ -1,0 +1,3 @@
+#!/bin/sh
+# gstack pregate 测试入口：忽略选中的文件参数，运行全部 Go 测试。
+exec go test ./...

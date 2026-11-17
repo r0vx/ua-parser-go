@@ -1,0 +1,36 @@
+{
+  "$schema": "https://github.com/garrytan/gstack/docs/pregate.md#pregate-v1",
+  "runner": "sh .gstack/run-go-tests.sh {files}",
+  "dependencies": {
+    "README.md": [],
+    "go.mod": [],
+    "go.sum": [],
+    "coverage.html": [],
+    "coverage.out": [],
+    "example/user_agents.csv": [],
+    "test_output.log": [],
+    ".gstack/run-go-tests.sh": [],
+    ".gstack/pregate.json": []
+  },
+  "empty_lanes": [],
+  "selection": {},
+  "warn": ["lanes"],
+  "allowlist": [
+    {
+      "finding": "pii.ip_public",
+      "paths": [
+        "testdata/extensions/extra-devices.json",
+        "example/user_agents.csv"
+      ],
+      "reason": "UA 测试数据中的公网 IP，非凭证"
+    }
+  ],
+  "strays": {
+    "allow": [
+      "coverage.html",
+      "coverage.out",
+      ".codegraph/",
+      ".gstack/"
+    ]
+  }
+}

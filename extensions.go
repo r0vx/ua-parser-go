@@ -84,6 +84,257 @@ var Crawlers = Extension{
 	},
 }
 
+// ExtraDevices 补充核心规则未覆盖的平板/手机厂商。
+var ExtraDevices = Extension{
+	Device: []RegexRule{
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`(nook)[\w ]+build\/(\w+)`),
+				MustCompile(`(dell) (strea[kpr\d ]*[\dko])`),
+				MustCompile(`(le[- ]+pan)[- ]+(\w{1,9}) bui`),
+				MustCompile(`(trinity)[- ]*(t\d{3}) bui`),
+				MustCompile(`(gigaset)[- ]+(q\w{1,9}) bui`),
+				MustCompile(`(vodafone) ([\w ]+)(?:\)| bui)`),
+			},
+			Props: []interface{}{
+				PropVendor,
+				PropModel,
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`(u304aa)`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "AT&T"},
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\bsie-(\w*)`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Siemens"},
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(rct\w+) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "RCA"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(venue[\d ]{2,7}) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Dell"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(q(?:mv|ta)\w+) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Verizon"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(?:barnes[& ]+noble |bn[rt])([\w\+ ]*) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Barnes & Noble"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(tm\d{3}\w+) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "NuVision"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(k88) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "ZTE"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(nx\d{3}j) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "ZTE"},
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(gen\d{3}) b.+49h`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Swiss"},
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(zur\d{3}) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Swiss"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`^((zeki)?tb.*\b) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Zeki"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`\b([yr]\d{2}) b`),
+				MustCompile(`\b(?:dragon[- ]+touch |dt)(\w{5}) b`),
+			},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Dragon Touch"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(ns-?\w{0,9}) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Insignia"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b((nxa|next)-?\w{0,9}) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "NextBook"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(xtreme_)?(v(1[045]|2[015]|[3469]0|7[05])) b`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropVendor, Value: "Voice"},
+				PropModel,
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(lvtel\-)?(v1[12]) b`)},
+			Props: []interface{}{
+				PropMapper{Prop: PropVendor, Value: "LvTel"},
+				PropModel,
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(ph-1) `)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Essential"},
+				PropMapper{Prop: PropType, Value: DeviceMobile},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(v(100md|700na|7011|917g).*\b) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Envizen"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\b(trio[-\w\. ]+) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "MachSpeed"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\btu_(1491) b`)},
+			Props: []interface{}{
+				PropModel,
+				PropMapper{Prop: PropVendor, Value: "Rotor"},
+				PropMapper{Prop: PropType, Value: DeviceTablet},
+			},
+		},
+	},
+}
+
+// InApps 识别桌面与移动端的应用内浏览器。
+var InApps = Extension{
+	Browser: []RegexRule{
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`\b(discord|figma|mattermost|notion|postman|rambox|rocket.chat|slack|teams)\/([\w\.]+).+(electron\/|; ios)`),
+				MustCompile(`(flipboard)\/([\w\.]+)`),
+			},
+			Props: []interface{}{
+				PropName,
+				PropVersion,
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+		{
+			Regexes: []*Regexp2{
+				MustCompile(`(evernote) win`),
+				MustCompile(`(teams)mobile-(ios|and)`),
+			},
+			Props: []interface{}{
+				PropName,
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`chatlyio\/([\d\.]+)`)},
+			Props: []interface{}{
+				PropVersion,
+				PropMapper{Prop: PropName, Value: "Slack"},
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`ultralite app_version\/([\w\.]+)`)},
+			Props: []interface{}{
+				PropVersion,
+				PropMapper{Prop: PropName, Value: "TikTok Lite"},
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`\) code\/([\d\.]+).+electron\/`)},
+			Props: []interface{}{
+				PropVersion,
+				PropMapper{Prop: PropName, Value: "VS Code"},
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+		{
+			Regexes: []*Regexp2{MustCompile(`jp\.co\.yahoo\.(?:android\.yjtop|ipn\.appli)\/([\d\.]+)`)},
+			Props: []interface{}{
+				PropVersion,
+				PropMapper{Prop: PropName, Value: "Yahoo! Japan"},
+				PropMapper{Prop: PropType, Value: BrowserTypeInApp},
+			},
+		},
+	},
+}
+
 // Libraries 识别 HTTP 客户端与库（Scrapy、axios、node-fetch 等）。
 var Libraries = Extension{
 	Browser: []RegexRule{
